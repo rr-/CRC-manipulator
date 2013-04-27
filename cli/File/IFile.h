@@ -14,10 +14,6 @@ class IFile {
 			FSEEK_BEHIND,
 			FSEEK_END
 		};
-		enum LockType {
-			FLOCK_SH,
-			FLOCK_EX
-		};
 		enum OpenMode {
 			FOPEN_READ = 1,
 			FOPEN_WRITE = 2,
@@ -38,8 +34,6 @@ class IFile {
 		virtual IFile& seek(const OffsetType& offset, SeekOrigin origin) = 0;
 		virtual IFile& read(unsigned char* buffer, const size_t& size) = 0;
 		virtual IFile& write(unsigned char* buffer, const size_t& size) = 0;
-		virtual IFile& lock(const LockType& type, bool block = false) = 0;
-		virtual IFile& unlock() = 0;
 };
 
 #endif

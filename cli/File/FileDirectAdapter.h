@@ -28,8 +28,6 @@ class FileDirectAdapter : public IFile {
 		virtual IFile& seek(const IFile::OffsetType& offset, IFile::SeekOrigin origin);
 		virtual IFile& read(unsigned char* buffer, const size_t& size);
 		virtual IFile& write(unsigned char* buffer, const size_t& size);
-		virtual IFile& lock(const IFile::LockType& type, bool block);
-		virtual IFile& unlock();
 };
 
 #endif

@@ -62,45 +62,6 @@ const IFile::OffsetType FileDirectAdapter::tell() const {
 	return static_cast<IFile::OffsetType>(ret);
 }
 
-IFile& FileDirectAdapter::unlock() {
-	#if defined(unix)
-		if (!flock(this->fileHandle, LOCK_UN)) {
-			pmesg(ERRLEV_ERROR, "I/O error\n");
-			throw ERR_IO_ERROR;
-		}
-	#else
-		throw ERR_NOT_IMPLEMENTED;
-	#endif
-	return *this;
-}
-
-
-
-
-IFile& FileDirectAdapter::lock(const IFile::LockType& type, bool block) {
-	#if defined(unix)
-		int operation;
-		switch(type) {
-			case FLOCK_EX:
-				operation = LOCK_EX;
-				break;
-			case FLOCK_SH:
-				operation = LOCK_SH;
-				break;
-			default:
-				pmesg(ERRLEV_ERROR, "invalid parameter(%d)\n", operation);
-				throw ERR_INVALID_PARAMETER;
-		}
-		if (!flock(this->fileHandle, operation)) {
-			pmesg(ERRLEV_ERROR, "I/O error\n");
-			throw ERR_IO_ERROR;
-		}
-	#else
-		throw ERR_NOT_IMPLEMENTED;
-	#endif
-	return *this;
-}
-
 IFile& FileDirectAdapter::read(unsigned char* buffer, const size_t& size) {
 	if (this->tell() + static_cast<IFile::OffsetType>(size) > this->getFileSize()) {
 		pmesg(ERRLEV_WARNING, "insufficient content(%ld + %ld > %ld)\n", this->tell(), size, this->getFileSize());

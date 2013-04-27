@@ -33,15 +33,6 @@ FileBufferedAdapter::~FileBufferedAdapter() {
 	this->thePointer = NULL;
 }
 
-IFile& FileBufferedAdapter::lock(const IFile::LockType& type, bool block) {
-	throw ERR_NOT_IMPLEMENTED;
-}
-
-IFile& FileBufferedAdapter::unlock() {
-	throw ERR_NOT_IMPLEMENTED;
-}
-
-
 IFile& FileBufferedAdapter::seek(const IFile::OffsetType& offset, SeekOrigin origin) {
 	unsigned char* oldPointer = this->thePointer;
 	switch(origin) {
