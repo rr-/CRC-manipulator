@@ -2,7 +2,6 @@
 #define CRC32_H
 
 #include "CRC.h"
-#include "../debug.h"
 
 class CRC32 : public CRC {
 	private:
@@ -24,8 +23,8 @@ class CRC32 : public CRC {
 
 		virtual const CRCType computePatch(
 			const CRCType& desiredChecksum,
-			const IFile::OffsetType& desiredPosition,
-			IFile& inputFile,
+			const File::OffsetType& desiredPosition,
+			File& inputFile,
 			const bool& overwrite) const;
 	public:
 		CRC32();

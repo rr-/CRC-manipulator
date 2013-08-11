@@ -2,7 +2,6 @@
 #define CRC16CCITT_H
 
 #include "CRC.h"
-#include "../debug.h"
 
 class CRC16CCITT : public CRC
 {
@@ -25,8 +24,8 @@ class CRC16CCITT : public CRC
 
 		virtual const CRCType computePatch(
 			const CRCType& desiredChecksum,
-			const IFile::OffsetType& desiredPosition,
-			IFile& inputFile,
+			const File::OffsetType& desiredPosition,
+			File& inputFile,
 			const bool& overwrite) const;
 	public:
 		CRC16CCITT();

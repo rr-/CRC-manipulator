@@ -1,10 +1,11 @@
 CRC-manipulator
 ===============
 
+crcmanip - CRC checksum manipulator 0.25
 Freely manipulate CRC32 checksums through smart file patching.
 Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]
 
-INFILE               input file. if -, standard input will be used.
+INFILE               input file.
 OUTFILE              output file. if -, standard output will be used.
 CHECKSUM             desired checksum.
 
@@ -18,10 +19,8 @@ OPTIONS can be:
     --overwrite      specifies that patch should overwrite existing bytes
 
 CHECKSUM must be a hexadecimal value.
-Program will try to perform operations in place, but to make it possible,
-the input file must be seekable. If it isn't seekable (for example, input
-was piped - as opposed to file redirection), program is going to allocate
-all the memory needed to load the input without any buffering.
+INFILE must be seekable stream. In other words, it cannot be a pipe
+(particularly standard input), fifo etc.
 
 Examples:
 ./crcmanip input.txt output.txt 1234abcd

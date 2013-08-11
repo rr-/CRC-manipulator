@@ -23,7 +23,7 @@
 	#include <Windows.h>
 #endif
 
-const char* getPathToSelf()
+const char *getPathToSelf()
 {
 	const size_t bufferSize = 256;
 	static char buffer [bufferSize];
@@ -37,7 +37,7 @@ const char* getPathToSelf()
 	#endif
 	else strcpy(buffer, "crcmanip");
 
-	char* slash = NULL;
+	char *slash = NULL;
 	slash = strrchr(buffer, '/');
 	if (slash != NULL)
 	{
@@ -51,7 +51,7 @@ const char* getPathToSelf()
 	return buffer;
 }
 
-const char* getVersion()
+const char *getVersion()
 {
 	const size_t bufferSize = 256;
 	static char buffer [bufferSize];
@@ -61,9 +61,9 @@ const char* getVersion()
 
 void updateProgress(
 	const CRC::CRCProgressType& progressType,
-	const IFile::OffsetType& startPosition,
-	const IFile::OffsetType& currentPosition,
-	const IFile::OffsetType& endPosition)
+	const File::OffsetType& startPos,
+	const File::OffsetType& curPos,
+	const File::OffsetType& endPos)
 {
 	static int i = 0;
 	static CRC::CRCProgressType lastProgressType;
@@ -98,10 +98,8 @@ void updateProgress(
 		case CRC::CRCPROG_CHECKSUM_PROGRESS:
 			if (i % 1000 == 0)
 			{
-				double progress = startPosition
-					+ (currentPosition - startPosition) * 100.0f
-					/ (endPosition - startPosition);
-				fprintf(stderr, "%6.02f%%\r", progress);
+				fprintf(stderr, "%6.02f%%\r",
+					(curPos - startPos) * 100.0f / (endPos - startPos));
 				fflush(stderr);
 			}
 			++ i;
@@ -117,7 +115,7 @@ void usage(FILE *where)
 	fprintf(where, "Freely manipulate CRC32 checksums through smart file patching.\n");
 	fprintf(where, "Usage: %s INFILE OUTFILE CHECKSUM [OPTIONS]\n", getPathToSelf());
 	fputs("\n", where);
-	fputs("INFILE               input file. if -, standard input will be used.\n", where);
+	fputs("INFILE               input file.\n", where);
 	fputs("OUTFILE              output file. if -, standard output will be used.\n", where);
 	fputs("CHECKSUM             desired checksum.\n\n", where);
 	fputs("OPTIONS can be:\n", where);
@@ -139,10 +137,8 @@ void usage(FILE *where)
 	fputs("\n", where);
 	*/
 	fputs("CHECKSUM must be a hexadecimal value.\n", where);
-	fputs("Program will try to perform operations in place, but to make it possible,\n", where);
-	fputs("the input file must be seekable. If it isn't seekable (for example, input\n", where);
-	fputs("was piped - as opposed to file redirection), program is going to allocate\n", where);
-	fputs("all the memory needed to load the input without any buffering.\n", where);
+	fputs("INFILE must be seekable stream. In other words, it cannot be a pipe\n", where);
+	fputs("(particularly standard input), fifo etc.\n", where);
 	fputs("\n", where);
 	fputs("Examples:\n", where);
 	fputs("./crcmanip input.txt output.txt 1234abcd\n", where);
@@ -154,7 +150,7 @@ void usage(FILE *where)
 	exit(EXIT_FAILURE);
 }
 
-void validateChecksum(CRC& activeCRC, const char* str, CRCType& checksum)
+void validateChecksum(CRC& activeCRC, const char *str, CRCType& checksum)
 {
 	if (strlen(str) > activeCRC.getNumBytes() * 2)
 	{
@@ -170,7 +166,7 @@ void validateChecksum(CRC& activeCRC, const char* str, CRCType& checksum)
 			"Resulting checksum will be padded with 0.\n",
 			activeCRC.getNumBytes() * 2);
 	}
-	const char* allowedCharacters = "0123456789abcdefABCDEF";
+	const char *allowedCharacters = "0123456789abcdefABCDEF";
 	for (size_t i = 0; i < strlen(str); i ++)
 	{
 		if (strchr(allowedCharacters, str[i]) == NULL)
@@ -184,9 +180,9 @@ void validateChecksum(CRC& activeCRC, const char* str, CRCType& checksum)
 	checksum = strtoul(str, NULL, 16);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-	CRC* activeCRC = new CRC32();
+	CRC *activeCRC = new CRC32();
 	activeCRC->setProgressFunction(&updateProgress);
 
 	for (int i = 1; i < argc; i ++)
@@ -204,11 +200,7 @@ int main(int argc, char** argv)
 		usage(stderr);
 		exit(EXIT_FAILURE);
 	}
-	char* pathIn = argv[1];
-	if (strcmp(pathIn, "-") == 0)
-	{
-		pathIn = NULL;
-	}
+	char *pathIn = argv[1];
 
 	if (argc < 3)
 	{
@@ -216,7 +208,7 @@ int main(int argc, char** argv)
 		usage(stderr);
 		exit(EXIT_FAILURE);
 	}
-	char* pathOut = argv[2];
+	char *pathOut = argv[2];
 	if (strcmp(pathOut, "-") == 0)
 	{
 		pathOut = NULL;
@@ -233,7 +225,7 @@ int main(int argc, char** argv)
 
 	bool overwrite = false;
 	bool desiredPositionSpecified = false;
-	IFile::OffsetType desiredPosition = -1;
+	File::OffsetType desiredPosition = -1;
 
 	for (int i = 4; i < argc; i ++)
 	{
@@ -270,30 +262,19 @@ int main(int argc, char** argv)
 
 
 	// Open the input file
-	IFile* inputFile = NULL;
+	File *inputFile = NULL;
 	try
 	{
-		if (pathIn == NULL)
-		{
-			#if !defined (unix)
-				setmode(fileno(stdin), O_BINARY);
-			#endif
-			inputFile = FileFactory::fromFileHandle(stdin);
-		}
-		else
-		{
-			inputFile = FileFactory::fromFileName(
-				pathIn,
-				IFile::FOPEN_READ | IFile::FOPEN_BINARY);
-			/*inputFile->lock(IFile::FLOCK_SH);*/
-		}
+		inputFile = File::fromFileName(
+			pathIn,
+			File::FOPEN_READ | File::FOPEN_BINARY);
 	}
 	catch (...)
 	{
 		fprintf(stderr, "Failed to open %s for reading.\n", pathIn);
 		exit(EXIT_FAILURE);
 	}
-	IFile::OffsetType totalSize = inputFile->getFileSize();
+	File::OffsetType totalSize = inputFile->getFileSize();
 
 
 
@@ -333,7 +314,7 @@ int main(int argc, char** argv)
 
 
 	// Open the output file
-	IFile* outputFile = NULL;
+	File *outputFile = NULL;
 	if (pathOut == NULL)
 	{
 		try
@@ -341,7 +322,7 @@ int main(int argc, char** argv)
 			#if !defined (unix)
 				setmode(fileno(stdout), O_BINARY);
 			#endif
-			outputFile = FileFactory::fromFileHandle(stdout);
+			outputFile = File::fromFileHandle(stdout);
 		}
 		catch (...)
 		{
@@ -351,35 +332,10 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		//try to lock file
-		/*try
-		{
-			outputFile = FileFactory::fromFileName(pathOut, "rb");
-		}
-		catch (...)
-		{
-			outputFile = NULL;
-		}
-		if (outputFile != NULL)
-		{
-			try
-			{
-				outputFile->lock(IFile::FLOCK_EX, FALSE);
-				outputFile->unlock();
-				delete outputFile;
-			}
-			catch (...)
-			{
-				fprintf(stderr, "Failed to open %s for writing.\n", pathOut);
-				exit(EXIT_FAILURE);
-			}
-		}*/
-
 		try
 		{
-			outputFile = FileFactory::fromFileName(
-				pathOut,
-				IFile::FOPEN_WRITE | IFile::FOPEN_BINARY);
+			outputFile = File::fromFileName(
+				pathOut, File::FOPEN_WRITE | File::FOPEN_BINARY);
 		}
 		catch (...)
 		{

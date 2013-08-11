@@ -8,14 +8,14 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "../debug.h"
-#include "../File/FileFactory.h"
+#include "../File/File.h"
 
-typedef uint32_t CRCType; // just make it enough to hold any derived CRC.
-// Templates would be real PITA since no abstract pointers would be possible.
+typedef uint32_t CRCType; //just make it enough to hold any derived CRC.
+//Templates would be real PITA since no abstract pointers would be possible.
 
 class CRC
 {
-	// Types, constants
+	//Types, constants
 	public:
 		enum CRCProgressType
 		{
@@ -29,40 +29,40 @@ class CRC
 		const static int ERR_NOT_IMPLEMENTED = 0;
 		const static int ERR_PATCH_FAILED = 1;
 
-	// Attributes
+	//Attributes
 	private:
 		CRCType finalXOR;
 		CRCType initialXOR;
 		void (*progressFunction)(
 			const CRCProgressType& progressType,
-			const IFile::OffsetType& startPosition,
-			const IFile::OffsetType& currentPosition,
-			const IFile::OffsetType& endPosition);
+			const File::OffsetType& startPosition,
+			const File::OffsetType& currentPosition,
+			const File::OffsetType& endPosition);
 
-	// Methods
+	//Methods
 	protected:
 		void markProgress(
 			const CRCProgressType& progressType,
-			const IFile::OffsetType& startPosition,
-			const IFile::OffsetType& currentPosition,
-			const IFile::OffsetType& endPosition) const;
+			const File::OffsetType& startPosition,
+			const File::OffsetType& currentPosition,
+			const File::OffsetType& endPosition) const;
 
 		const CRCType computePartialChecksum(
-			IFile& inputFile,
-			const IFile::OffsetType& startPosition,
-			const IFile::OffsetType& endPosition,
+			File& inputFile,
+			const File::OffsetType& startPosition,
+			const File::OffsetType& endPosition,
 			const CRCType& initialChecksum = 0) const;
 
 		const CRCType computeReversePartialChecksum(
-			IFile& inputFile,
-			const IFile::OffsetType& startPosition,
-			const IFile::OffsetType& endPosition,
+			File& inputFile,
+			const File::OffsetType& startPosition,
+			const File::OffsetType& endPosition,
 			const CRCType& initialChecksum = 0) const;
 
 		virtual const CRCType computePatch(
 			const CRCType& desiredCRC,
-			const IFile::OffsetType& desiredPosition,
-			IFile& inputFile,
+			const File::OffsetType& desiredPosition,
+			File& inputFile,
 			const bool& overwrite = false) const = 0;
 
 		/**
@@ -90,17 +90,17 @@ class CRC
 
 		void setProgressFunction(void(*function)(
 			const CRCProgressType& progressType,
-			const IFile::OffsetType& startPosition,
-			const IFile::OffsetType& currentPosition,
-			const IFile::OffsetType& endPosition));
+			const File::OffsetType& startPosition,
+			const File::OffsetType& currentPosition,
+			const File::OffsetType& endPosition));
 
-		const CRCType computeChecksum(IFile& inputFile) const;
+		const CRCType computeChecksum(File& inputFile) const;
 
 		void applyPatch(
 			const CRCType& desiredCRC,
-			const IFile::OffsetType& desiredPosition,
-			IFile& inputFile,
-			IFile& outputFile,
+			const File::OffsetType& desiredPosition,
+			File& inputFile,
+			File& outputFile,
 			const bool& overwrite = false) const;
 };
 

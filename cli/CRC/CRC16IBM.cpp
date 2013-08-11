@@ -1,4 +1,5 @@
 #include "CRC16IBM.h"
+#include "../debug.h"
 
 const CRCType CRC16IBM::getPolynomial() const
 {
@@ -74,16 +75,10 @@ CRC16IBM::CRC16IBM() : CRC()
 
 const CRCType CRC16IBM::computePatch(
 	const CRCType& desiredChecksum,
-	const IFile::OffsetType& desiredPosition,
-	IFile& inputFile,
+	const File::OffsetType& desiredPosition,
+	File& inputFile,
 	const bool& overwrite) const
 {
-	IFile::OffsetType position = desiredPosition;
-	if (overwrite)
-	{
-		position += 2;
-	}
-
 	uint16_t checksum1 = this->computePartialChecksum(
 		inputFile,
 		0,
@@ -92,7 +87,7 @@ const CRCType CRC16IBM::computePatch(
 	uint16_t checksum2 = this->computeReversePartialChecksum(
 		inputFile,
 		inputFile.getFileSize(),
-		position,
+		desiredPosition + ((File::OffsetType) (overwrite ? 2 : 0)),
 		(uint16_t) (desiredChecksum ^ this->getFinalXOR()));
 
 	uint16_t patch = checksum2;

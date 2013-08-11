@@ -1,4 +1,5 @@
 #include "CRC32.h"
+#include "../debug.h"
 
 /**
  * NOTICE: following code is strongly based on SAR-PR-2006-05
@@ -78,16 +79,10 @@ CRC32::CRC32() : CRC()
 
 const CRCType CRC32::computePatch(
 	const CRCType& desiredChecksum,
-	const IFile::OffsetType& desiredPosition,
-	IFile& inputFile,
+	const File::OffsetType& desiredPosition,
+	File& inputFile,
 	const bool& overwrite) const
 {
-	IFile::OffsetType position = desiredPosition;
-	if (overwrite)
-	{
-		position += 4;
-	}
-
 	uint32_t checksum1 = this->computePartialChecksum(
 		inputFile,
 		0,
@@ -96,7 +91,7 @@ const CRCType CRC32::computePatch(
 	uint32_t checksum2 = this->computeReversePartialChecksum(
 		inputFile,
 		inputFile.getFileSize(),
-		position,
+		desiredPosition + ((File::OffsetType) (overwrite ? 4 : 0)),
 		(uint32_t) (desiredChecksum ^ this->getFinalXOR()));
 
 	uint32_t patch = checksum2;
