@@ -115,7 +115,7 @@ void usage(FILE *where)
 	fprintf(where, "Freely manipulate CRC32 checksums through smart file patching.\n");
 	fprintf(where, "Usage: %s INFILE OUTFILE CHECKSUM [OPTIONS]\n", getPathToSelf());
 	fputs("\n", where);
-	fputs("INFILE               input file.\n", where);
+	fputs("INFILE               input file. if -, standard input will be used.\n", where);
 	fputs("OUTFILE              output file. if -, standard output will be used.\n", where);
 	fputs("CHECKSUM             desired checksum.\n\n", where);
 	fputs("OPTIONS can be:\n", where);
@@ -146,7 +146,6 @@ void usage(FILE *where)
 	fputs("./crcmanip input.txt - 1234abcd >output.txt\n", where);
 	fputs("./crcmanip - output.txt 1234abcd <input.txt\n", where);
 	fputs("./crcmanip - - 1234abcd <input.txt >output.txt\n", where);
-	fputs("cat input.txt|./crcmanip - output.txt 1234abcd\n", where);
 	exit(EXIT_FAILURE);
 }
 
@@ -201,6 +200,10 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	char *pathIn = argv[1];
+	if (strcmp(pathIn, "-") == 0)
+	{
+		pathIn = NULL;
+	}
 
 	if (argc < 3)
 	{
@@ -265,9 +268,18 @@ int main(int argc, char **argv)
 	File *inputFile = NULL;
 	try
 	{
-		inputFile = File::fromFileName(
-			pathIn,
-			File::FOPEN_READ | File::FOPEN_BINARY);
+		if (pathIn == NULL)
+		{
+			#if !defined (unix)
+				setmode(fileno(stdin), O_BINARY);
+			#endif
+			inputFile = File::fromFileHandle(stdin);
+		}
+		else
+		{
+			inputFile = File::fromFileName(
+				pathIn, File::FOPEN_READ | File::FOPEN_BINARY);
+		}
 	}
 	catch (...)
 	{
@@ -315,33 +327,25 @@ int main(int argc, char **argv)
 
 	// Open the output file
 	File *outputFile = NULL;
-	if (pathOut == NULL)
+	try
 	{
-		try
+		if (pathOut == NULL)
 		{
 			#if !defined (unix)
 				setmode(fileno(stdout), O_BINARY);
 			#endif
 			outputFile = File::fromFileHandle(stdout);
 		}
-		catch (...)
-		{
-			fprintf(stderr, "Failed to open standard output for writing.\n");
-			exit(EXIT_FAILURE);
-		}
-	}
-	else
-	{
-		try
+		else
 		{
 			outputFile = File::fromFileName(
 				pathOut, File::FOPEN_WRITE | File::FOPEN_BINARY);
 		}
-		catch (...)
-		{
-			fprintf(stderr, "Failed to open %s for writing.\n", pathOut);
-			exit(EXIT_FAILURE);
-		}
+	}
+	catch (...)
+	{
+		fprintf(stderr, "Failed to open %s for writing.\n", pathOut);
+		exit(EXIT_FAILURE);
 	}
 
 
