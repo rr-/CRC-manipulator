@@ -11,12 +11,23 @@ enum ErrorLevel {
 };
 
 #if defined(NDEBUG) && defined(__GNUC__)
-	#define pmesg(format, args...) ((void)0)
+	#define pmesg(format, args...) ((void) 0)
 #else
-#include <stdio.h>
-#include <stdarg.h>
-	void __pmesg (int level, const char* file, unsigned int line, const char* function, const char* format, ...);
-	#define pmesg(level, format, ...) __pmesg(level, __FILE__, __LINE__, __FUNCTION__, format, ## __VA_ARGS__)
+	#include <stdio.h>
+	#include <stdarg.h>
+
+	void __pmesg(
+		int level,
+		const char* file,
+		unsigned int line,
+		const char* function,
+		const char* format,
+		...);
+
+	#define pmesg(level, format, ...) \
+		__pmesg(level, \
+			__FILE__, __LINE__, __FUNCTION__, \
+			format, ## __VA_ARGS__)
 #endif
 
 #endif

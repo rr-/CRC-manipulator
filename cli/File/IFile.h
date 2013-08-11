@@ -7,7 +7,7 @@
 
 class IFile {
 	public:
-		typedef long int OffsetType;
+		typedef long long int OffsetType;
 		enum SeekOrigin {
 			FSEEK_BEGINNING,
 			FSEEK_AHEAD,

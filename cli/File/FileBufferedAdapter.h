@@ -31,7 +31,10 @@ class FileBufferedAdapter : public IFile {
 		virtual const size_t getBufferSize() const;
 		virtual const IFile::OffsetType getFileSize() const;
 		virtual const IFile::OffsetType tell() const;
-		virtual IFile& seek(const IFile::OffsetType& offset, IFile::SeekOrigin origin);
+		virtual IFile& seek(
+			const IFile::OffsetType& offset,
+			IFile::SeekOrigin origin);
+
 		virtual IFile& read(unsigned char* buffer, const size_t& size);
 		virtual IFile& write(unsigned char* buffer, const size_t& size);
 };

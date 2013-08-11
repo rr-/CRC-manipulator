@@ -2,9 +2,12 @@
 #define VERSION_H
 
 #define MAJOR_VERSION 0
-#define MINOR_VERSION 24
+#define MINOR_VERSION 25
 
 /*
+ * Version 0.25:
+ * - Support for files larger than 4GB
+
  * Version 0.24:
  * - Simplified CLI parameters
  * - Removed CLI parameter support for types other than CRC32
