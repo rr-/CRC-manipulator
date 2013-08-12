@@ -1,28 +1,28 @@
 #include "CRC16IBM.h"
 #include "../debug.h"
 
-const CRCType CRC16IBM::getPolynomial() const
+CRCType CRC16IBM::getPolynomial() const
 {
 	return (1 << 0 | 1 << 2 | 1 << 15);
 }
 
-const CRCType CRC16IBM::getPolynomialReverse() const
+CRCType CRC16IBM::getPolynomialReverse() const
 {
 	return (1 << (15-0) | 1 << (15-2) | 1 << (15-15));
 }
 
-const size_t CRC16IBM::getNumBytes() const
+size_t CRC16IBM::getNumBytes() const
 {
 	return 2;
 }
 
-const size_t CRC16IBM::getNumBits() const
+size_t CRC16IBM::getNumBits() const
 {
 	return 16;
 }
 
-const CRCType CRC16IBM::makeNextChecksum(
-	const CRCType& prevChecksum,
+CRCType CRC16IBM::makeNextChecksum(
+	const CRCType &prevChecksum,
 	unsigned char c) const
 {
 	uint8_t tmp = (prevChecksum ^ c) & 0xff;
@@ -31,8 +31,8 @@ const CRCType CRC16IBM::makeNextChecksum(
 	return ret;
 }
 
-const CRCType CRC16IBM::makePrevChecksum(
-	const CRCType& nextChecksum,
+CRCType CRC16IBM::makePrevChecksum(
+	const CRCType &nextChecksum,
 	unsigned char c) const
 {
 	uint8_t tmp = (nextChecksum >> 8) & 0xff;
@@ -73,11 +73,11 @@ CRC16IBM::CRC16IBM() : CRC()
 	}
 }
 
-const CRCType CRC16IBM::computePatch(
-	const CRCType& desiredChecksum,
-	const File::OffsetType& desiredPosition,
-	File& inputFile,
-	const bool& overwrite) const
+CRCType CRC16IBM::computePatch(
+	const CRCType &desiredChecksum,
+	const File::OffsetType &desiredPosition,
+	File &inputFile,
+	const bool &overwrite) const
 {
 	uint16_t checksum1 = this->computePartialChecksum(
 		inputFile,

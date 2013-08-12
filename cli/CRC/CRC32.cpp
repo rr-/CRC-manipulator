@@ -5,28 +5,28 @@
  * NOTICE: following code is strongly based on SAR-PR-2006-05
  */
 
-const CRCType CRC32::getPolynomial() const
+CRCType CRC32::getPolynomial() const
 {
 	return 0x04C11DB7;
 }
 
-const CRCType CRC32::getPolynomialReverse() const
+CRCType CRC32::getPolynomialReverse() const
 {
 	return 0xEDB88320;
 }
 
-const size_t CRC32::getNumBytes() const
+size_t CRC32::getNumBytes() const
 {
 	return 4;
 }
 
-const size_t CRC32::getNumBits() const
+size_t CRC32::getNumBits() const
 {
 	return 32;
 }
 
-const CRCType CRC32::makeNextChecksum(
-	const CRCType& prevChecksum,
+CRCType CRC32::makeNextChecksum(
+	const CRCType &prevChecksum,
 	unsigned char c) const
 {
 	uint8_t tmp = (prevChecksum ^ c) & 0xff;
@@ -35,8 +35,8 @@ const CRCType CRC32::makeNextChecksum(
 	return ret;
 }
 
-const CRCType CRC32::makePrevChecksum(
-	const CRCType& nextChecksum,
+CRCType CRC32::makePrevChecksum(
+	const CRCType &nextChecksum,
 	unsigned char c) const
 {
 	uint8_t tmp = (nextChecksum >> 24) & 0xff;
@@ -77,11 +77,11 @@ CRC32::CRC32() : CRC()
 	}
 }
 
-const CRCType CRC32::computePatch(
-	const CRCType& desiredChecksum,
-	const File::OffsetType& desiredPosition,
-	File& inputFile,
-	const bool& overwrite) const
+CRCType CRC32::computePatch(
+	const CRCType &desiredChecksum,
+	const File::OffsetType &desiredPosition,
+	File &inputFile,
+	const bool &overwrite) const
 {
 	uint32_t checksum1 = this->computePartialChecksum(
 		inputFile,

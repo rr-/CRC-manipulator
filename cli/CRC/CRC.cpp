@@ -10,17 +10,26 @@ CRC::CRC()
 
 
 /**
+ * Destructor...
+ */
+CRC::~CRC()
+{
+}
+
+
+
+/**
  * Getters
  */
 
-const CRCType& CRC::getInitialXOR() const
+const CRCType &CRC::getInitialXOR() const
 {
 	return this->initialXOR;
 }
 
 
 
-const CRCType& CRC::getFinalXOR() const
+const CRCType &CRC::getFinalXOR() const
 {
 	return this->finalXOR;
 }
@@ -29,14 +38,14 @@ const CRCType& CRC::getFinalXOR() const
  * Setters
  */
 
-void CRC::setInitialXOR(const CRCType& f)
+void CRC::setInitialXOR(const CRCType &f)
 {
 	this->initialXOR = f;
 }
 
 
 
-void CRC::setFinalXOR(const CRCType& f)
+void CRC::setFinalXOR(const CRCType &f)
 {
 	this->finalXOR = f;
 }
@@ -44,10 +53,10 @@ void CRC::setFinalXOR(const CRCType& f)
 
 
 void CRC::setProgressFunction(
-	void(*function)(const CRCProgressType& progressType,
-	const File::OffsetType& startPos,
-	const File::OffsetType& curPos,
-	const File::OffsetType& endPos))
+	void(*function)(const CRCProgressType &progressType,
+	const File::OffsetType &startPos,
+	const File::OffsetType &curPos,
+	const File::OffsetType &endPos))
 {
 	this->progressFunction = function;
 }
@@ -59,13 +68,13 @@ void CRC::setProgressFunction(
  * computed patch at given position along the way.
  */
 void CRC::applyPatch(
-	const CRCType& finalChecksum,
-	const File::OffsetType& finalPos,
-	File& input,
-	File& output,
-	const bool& overwrite) const
+	const CRCType &finalChecksum,
+	const File::OffsetType &finalPos,
+	File &input,
+	File &output,
+	const bool &overwrite) const
 {
-	unsigned char* buffer = new unsigned char[input.getBufferSize()];
+	unsigned char *buffer = new unsigned char[input.getBufferSize()];
 	CRCType patch = this->computePatch(
 		finalChecksum,
 		finalPos,
@@ -86,7 +95,6 @@ void CRC::applyPatch(
 		{
 			chunkSize = ((size_t) (finalPos - pos));
 		}
-		assert(chunkSize >= 0);
 		input.read(buffer, chunkSize);
 		output.write(buffer, chunkSize);
 		pos += chunkSize;
@@ -117,7 +125,6 @@ void CRC::applyPatch(
 		{
 			chunkSize = input.getFileSize() - pos;
 		}
-		assert(chunkSize >= 0);
 		input.read(buffer, chunkSize);
 		output.write(buffer, chunkSize);
 		pos += chunkSize;
@@ -133,7 +140,7 @@ void CRC::applyPatch(
  * Computes the checksum of given file.
  * NOTICE: Leaves internal file pointer position intact.
  */
-const CRCType CRC::computeChecksum(File& input) const
+CRCType CRC::computeChecksum(File &input) const
 {
 	CRCType checksum = this->getInitialXOR();
 	checksum = this->computePartialChecksum(
@@ -150,11 +157,11 @@ const CRCType CRC::computeChecksum(File& input) const
  * Computes partial checksum of given file.
  * NOTICE: Leaves internal file pointer position intact.
  */
-const CRCType CRC::computePartialChecksum(
-	File& input,
-	const File::OffsetType& startPos,
-	const File::OffsetType& endPos,
-	const CRCType& initialChecksum) const
+CRCType CRC::computePartialChecksum(
+	File &input,
+	const File::OffsetType &startPos,
+	const File::OffsetType &endPos,
+	const CRCType &initialChecksum) const
 {
 	assert(startPos <= endPos);
 	if (startPos == endPos)
@@ -162,7 +169,7 @@ const CRCType CRC::computePartialChecksum(
 		return initialChecksum;
 	}
 	CRCType checksum = initialChecksum;
-	unsigned char* buffer = new unsigned char[input.getBufferSize()];
+	unsigned char *buffer = new unsigned char[input.getBufferSize()];
 	File::OffsetType oldPos = input.tell();
 	File::OffsetType pos = startPos;
 	input.seek(pos, File::FSEEK_BEGINNING);
@@ -176,7 +183,6 @@ const CRCType CRC::computePartialChecksum(
 		{
 			chunkSize = ((size_t) (endPos - pos));
 		}
-		assert(chunkSize >= 0);
 		input.read(buffer, chunkSize);
 		for (size_t i = 0; i < chunkSize; i ++)
 		{
@@ -197,11 +203,11 @@ const CRCType CRC::computePartialChecksum(
  * Computes reverse partial checksum of given file.
  * NOTICE: Leaves internal file pointer position intact.
  */
-const CRCType CRC::computeReversePartialChecksum(
-	File& input,
-	const File::OffsetType& startPos,
-	const File::OffsetType& endPos,
-	const CRCType& initialChecksum) const
+CRCType CRC::computeReversePartialChecksum(
+	File &input,
+	const File::OffsetType &startPos,
+	const File::OffsetType &endPos,
+	const CRCType &initialChecksum) const
 {
 	assert(startPos >= endPos);
 	if (startPos == endPos)
@@ -209,7 +215,7 @@ const CRCType CRC::computeReversePartialChecksum(
 		return initialChecksum;
 	}
 	CRCType checksum = initialChecksum;
-	unsigned char* buffer = new unsigned char[input.getBufferSize()];
+	unsigned char *buffer = new unsigned char[input.getBufferSize()];
 	File::OffsetType oldPos = input.tell();
 	File::OffsetType pos = startPos;
 	this->markProgress(CRCPROG_CHECKSUM_START, startPos, startPos, endPos);
@@ -222,7 +228,6 @@ const CRCType CRC::computeReversePartialChecksum(
 		{
 			chunkSize = ((size_t) (pos - endPos));
 		}
-		assert(chunkSize >= 0);
 		pos -= chunkSize;
 		input.seek(pos, File::FSEEK_BEGINNING);
 		input.read(buffer, chunkSize);
@@ -241,10 +246,10 @@ const CRCType CRC::computeReversePartialChecksum(
 
 
 void CRC::markProgress(
-	const CRCProgressType& progressType,
-	const File::OffsetType& startPos,
-	const File::OffsetType& curPos,
-	const File::OffsetType& endPos) const
+	const CRCProgressType &progressType,
+	const File::OffsetType &startPos,
+	const File::OffsetType &curPos,
+	const File::OffsetType &endPos) const
 {
 	if (this->progressFunction == NULL)
 	{

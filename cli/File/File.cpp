@@ -3,14 +3,14 @@
 #include <string.h>
 #include <assert.h>
 
-File* File::fromFileHandle(FILE* fileHandle)
+File *File::fromFileHandle(FILE *fileHandle)
 {
 	return new File(fileHandle);
 }
 
 
 
-File* File::fromFileName(const char* fileName, int openMode)
+File *File::fromFileName(const char *fileName, int openMode)
 {
 	char modeString[5];
 	strcpy(modeString, "");
@@ -33,7 +33,7 @@ File* File::fromFileName(const char* fileName, int openMode)
 
 
 	assert(fileName != NULL);
-	FILE* fileHandle = fopen(fileName, modeString);
+	FILE *fileHandle = fopen(fileName, modeString);
 	if (fileHandle == NULL)
 	{
 		pmesg(ERRLEV_ERROR, "I/O error\n");
@@ -44,14 +44,14 @@ File* File::fromFileName(const char* fileName, int openMode)
 
 
 
-File::File(FILE* fileHandle) : fileHandle(NULL)
+File::File(FILE *fileHandle) : fileHandle(NULL)
 {
 	this->fileHandle = fileHandle;
 
 	bool ok = true;
-	ok &= (fseeko(this->fileHandle, 0, SEEK_END) != -1);
-	ok &= ((this->fileSize = ftello(this->fileHandle)) != -1);
-	ok &= (fseeko(this->fileHandle, 0, SEEK_SET)) != -1;
+	ok &= (fseeko64(this->fileHandle, 0, SEEK_END) != -1);
+	ok &= ((this->fileSize = ftello64(this->fileHandle)) != -1);
+	ok &= (fseeko64(this->fileHandle, 0, SEEK_SET)) != -1;
 
 	if (!ok)
 	{
@@ -68,8 +68,8 @@ File::~File()
 
 
 
-File& File::seek(
-	const OffsetType& offset,
+File &File::seek(
+	const OffsetType &offset,
 	SeekOrigin origin)
 {
 	OffsetType destination = 0;
@@ -107,7 +107,7 @@ File& File::seek(
 		throw ERR_INVALID_POSITION;
 	}
 
-	int result = fseeko(this->fileHandle, offset, SEEK_SET);
+	int result = fseeko64(this->fileHandle, offset, SEEK_SET);
 
 	if (result != 0)
 	{
@@ -119,9 +119,9 @@ File& File::seek(
 
 
 
-const File::OffsetType File::tell() const
+File::OffsetType File::tell() const
 {
-	off_t ret = ftello(this->fileHandle);
+	off_t ret = ftello64(this->fileHandle);
 	if (ret == -1L)
 	{
 		pmesg(ERRLEV_ERROR, "I/O error\n");
@@ -132,7 +132,7 @@ const File::OffsetType File::tell() const
 
 
 
-File& File::read(unsigned char* buffer, const size_t& size)
+File &File::read(unsigned char *buffer, const size_t &size)
 {
 	if (((OffsetType) this->tell()) + ((OffsetType) size) > this->getFileSize())
 	{
@@ -156,7 +156,7 @@ File& File::read(unsigned char* buffer, const size_t& size)
 
 
 
-File& File::write(unsigned char* buffer, const size_t& size)
+File &File::write(unsigned char *buffer, const size_t &size)
 {
 	if (fwrite(buffer, sizeof(unsigned char), size, this->fileHandle) != size)
 	{
@@ -175,14 +175,14 @@ File& File::write(unsigned char* buffer, const size_t& size)
 
 
 
-const size_t File::getBufferSize() const
+size_t File::getBufferSize() const
 {
 	return 8192;
 }
 
 
 
-const File::OffsetType File::getFileSize() const
+File::OffsetType File::getFileSize() const
 {
 	return this->fileSize;
 }

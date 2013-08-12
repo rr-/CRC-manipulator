@@ -34,74 +34,75 @@ class CRC
 		CRCType finalXOR;
 		CRCType initialXOR;
 		void (*progressFunction)(
-			const CRCProgressType& progressType,
-			const File::OffsetType& startPosition,
-			const File::OffsetType& currentPosition,
-			const File::OffsetType& endPosition);
+			const CRCProgressType &progressType,
+			const File::OffsetType &startPosition,
+			const File::OffsetType &currentPosition,
+			const File::OffsetType &endPosition);
 
 	//Methods
 	protected:
 		void markProgress(
-			const CRCProgressType& progressType,
-			const File::OffsetType& startPosition,
-			const File::OffsetType& currentPosition,
-			const File::OffsetType& endPosition) const;
+			const CRCProgressType &progressType,
+			const File::OffsetType &startPosition,
+			const File::OffsetType &currentPosition,
+			const File::OffsetType &endPosition) const;
 
-		const CRCType computePartialChecksum(
-			File& inputFile,
-			const File::OffsetType& startPosition,
-			const File::OffsetType& endPosition,
-			const CRCType& initialChecksum = 0) const;
+		CRCType computePartialChecksum(
+			File &inputFile,
+			const File::OffsetType &startPosition,
+			const File::OffsetType &endPosition,
+			const CRCType &initialChecksum = 0) const;
 
-		const CRCType computeReversePartialChecksum(
-			File& inputFile,
-			const File::OffsetType& startPosition,
-			const File::OffsetType& endPosition,
-			const CRCType& initialChecksum = 0) const;
+		CRCType computeReversePartialChecksum(
+			File &inputFile,
+			const File::OffsetType &startPosition,
+			const File::OffsetType &endPosition,
+			const CRCType &initialChecksum = 0) const;
 
-		virtual const CRCType computePatch(
-			const CRCType& desiredCRC,
-			const File::OffsetType& desiredPosition,
-			File& inputFile,
-			const bool& overwrite = false) const = 0;
+		virtual CRCType computePatch(
+			const CRCType &desiredCRC,
+			const File::OffsetType &desiredPosition,
+			File &inputFile,
+			const bool &overwrite = false) const = 0;
 
 		/**
 		 * The following methods calculate new checksums based on
 		 * previous checksum value and current input byte.
 		 */
-		virtual const CRCType makeNextChecksum(
-			const CRCType& checksum,
+		virtual CRCType makeNextChecksum(
+			const CRCType &checksum,
 			unsigned char c) const = 0;
 
-		virtual const CRCType makePrevChecksum(
-			const CRCType& checksum,
+		virtual CRCType makePrevChecksum(
+			const CRCType &checksum,
 			unsigned char c) const = 0;
 	public:
-		virtual const size_t getNumBits() const = 0;
-		virtual const size_t getNumBytes() const = 0;
-		virtual const CRCType getPolynomial() const = 0;
-		virtual const CRCType getPolynomialReverse() const = 0;
+		virtual size_t getNumBits() const = 0;
+		virtual size_t getNumBytes() const = 0;
+		virtual CRCType getPolynomial() const = 0;
+		virtual CRCType getPolynomialReverse() const = 0;
 
 		CRC();
-		const CRCType& getInitialXOR() const;
-		const CRCType& getFinalXOR() const;
-		void setInitialXOR(const CRCType& t);
-		void setFinalXOR(const CRCType& t);
+		virtual ~CRC();
+		const CRCType &getInitialXOR() const;
+		const CRCType &getFinalXOR() const;
+		void setInitialXOR(const CRCType &t);
+		void setFinalXOR(const CRCType &t);
 
 		void setProgressFunction(void(*function)(
-			const CRCProgressType& progressType,
-			const File::OffsetType& startPosition,
-			const File::OffsetType& currentPosition,
-			const File::OffsetType& endPosition));
+			const CRCProgressType &progressType,
+			const File::OffsetType &startPosition,
+			const File::OffsetType &currentPosition,
+			const File::OffsetType &endPosition));
 
-		const CRCType computeChecksum(File& inputFile) const;
+		CRCType computeChecksum(File &inputFile) const;
 
 		void applyPatch(
-			const CRCType& desiredCRC,
-			const File::OffsetType& desiredPosition,
-			File& inputFile,
-			File& outputFile,
-			const bool& overwrite = false) const;
+			const CRCType &desiredCRC,
+			const File::OffsetType &desiredPosition,
+			File &inputFile,
+			File &outputFile,
+			const bool &overwrite = false) const;
 };
 
 #endif

@@ -1,28 +1,28 @@
 #include "CRC16CCITT.h"
 #include "../debug.h"
 
-const CRCType CRC16CCITT::getPolynomial() const
+CRCType CRC16CCITT::getPolynomial() const
 {
 	return (1 << 0 | 1 << 5 | 1 << 12);
 }
 
-const CRCType CRC16CCITT::getPolynomialReverse() const
+CRCType CRC16CCITT::getPolynomialReverse() const
 {
 	return (1 << (15-0) | 1 << (15-5) | 1 << (15-12));
 }
 
-const size_t CRC16CCITT::getNumBytes() const
+size_t CRC16CCITT::getNumBytes() const
 {
 	return 2;
 }
 
-const size_t CRC16CCITT::getNumBits() const
+size_t CRC16CCITT::getNumBits() const
 {
 	return 16;
 }
 
-const CRCType CRC16CCITT::makeNextChecksum(
-	const CRCType& prevChecksum,
+CRCType CRC16CCITT::makeNextChecksum(
+	const CRCType &prevChecksum,
 	unsigned char c) const
 {
 	uint8_t tmp = ((prevChecksum >> 8) ^ c) & 0xff;
@@ -31,8 +31,8 @@ const CRCType CRC16CCITT::makeNextChecksum(
 	return ret;
 }
 
-const CRCType CRC16CCITT::makePrevChecksum(
-	const CRCType& nextChecksum,
+CRCType CRC16CCITT::makePrevChecksum(
+	const CRCType &nextChecksum,
 	unsigned char c) const
 {
 	uint16_t ret =
@@ -113,11 +113,11 @@ CRC16CCITT::CRC16CCITT() : CRC()
 	}
 }
 
-const CRCType CRC16CCITT::computePatch(
-	const CRCType& desiredChecksum,
-	const File::OffsetType& desiredPosition,
-	File& inputFile,
-	const bool& overwrite) const
+CRCType CRC16CCITT::computePatch(
+	const CRCType &desiredChecksum,
+	const File::OffsetType &desiredPosition,
+	File &inputFile,
+	const bool &overwrite) const
 {
 	uint16_t checksum1 = this->computePartialChecksum(
 		inputFile,

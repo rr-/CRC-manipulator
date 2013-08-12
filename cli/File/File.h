@@ -1,18 +1,18 @@
 #ifndef FILE_H
 #define FILE_H
 
-#include <stdio.h>
-#if defined(unix)
-	#include <fcntl.h>
-#else
-	#include <Windows.h>
-	#include <io.h>
+#if defined __CYGWIN__
+	#define _FILE_OFFSET_BITS 64
+	#define fseeko64(a,b,c) fseeko(a,b,c)
+	#define ftello64(a) ftello(a)
+	#define off64_t off_t
 #endif
+#include <stdio.h>
 
 class File
 {
 	public:
-		typedef off_t OffsetType;
+		typedef off64_t OffsetType;
 		enum SeekOrigin
 		{
 			FSEEK_BEGINNING,
@@ -43,15 +43,12 @@ class File
 	public:
 		~File();
 
-		virtual const size_t getBufferSize() const;
-		virtual const OffsetType getFileSize() const;
-		virtual const OffsetType tell() const;
-		virtual File& seek(
-			const OffsetType& offset,
-			SeekOrigin origin);
-
-		virtual File& read(unsigned char* buffer, const size_t& size);
-		virtual File& write(unsigned char* buffer, const size_t& size);
+		size_t getBufferSize() const;
+		OffsetType getFileSize() const;
+		OffsetType tell() const;
+		File &seek(const OffsetType &offset, SeekOrigin origin);
+		File &read(unsigned char* buffer, const size_t &size);
+		File &write(unsigned char* buffer, const size_t &size);
 
 		static File* fromFileHandle(FILE* fileHandle);
 		static File* fromFileName(const char* fileName, int openMode);

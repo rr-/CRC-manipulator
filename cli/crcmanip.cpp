@@ -1,11 +1,9 @@
-#define _LARGEFILE64_SOURCE 1
-#define _FILE_OFFSET_BITS 64
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-#include <unistd.h>
+#if defined __linux__
+#elif defined _WIN32 || defined _WIN64 || defined __CYGWIN__
+	#include <Windows.h>
+#else
+    #error unknown platform
+#endif
 
 #include "debug.h"
 #include "version.h"
@@ -14,13 +12,14 @@
 #include "CRC/CRC16IBM.h"
 #include "CRC/CRC16CCITT.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#include <unistd.h>
+
 #if !defined (unix)
 	#include <sys/fcntl.h> // for setmode
-#endif
-
-
-#ifdef WINDOWS
-	#include <Windows.h>
 #endif
 
 const char *getPathToSelf()
@@ -28,11 +27,11 @@ const char *getPathToSelf()
 	const size_t bufferSize = 256;
 	static char buffer [bufferSize];
 	if (false);
-	#if defined (unix)
+	#if defined __linux__
 	else if (readlink("/proc/self/exe", buffer, bufferSize));
 	else if (readlink("/proc/curproc/file", buffer, bufferSize));
 	else if (readlink("/proc/self/path/a.out", buffer, bufferSize));
-	#elif defined (WINDOWS)
+	#elif defined _WIN32 || defined _WIN64
 	else if (GetModuleFileName(NULL, buffer, bufferSize));
 	#endif
 	else strcpy(buffer, "crcmanip");
@@ -60,10 +59,10 @@ const char *getVersion()
 }
 
 void updateProgress(
-	const CRC::CRCProgressType& progressType,
-	const File::OffsetType& startPos,
-	const File::OffsetType& curPos,
-	const File::OffsetType& endPos)
+	const CRC::CRCProgressType &progressType,
+	const File::OffsetType &startPos,
+	const File::OffsetType &curPos,
+	const File::OffsetType &endPos)
 {
 	static int i = 0;
 	static CRC::CRCProgressType lastProgressType;
@@ -149,7 +148,7 @@ void usage(FILE *where)
 	exit(EXIT_FAILURE);
 }
 
-void validateChecksum(CRC& activeCRC, const char *str, CRCType& checksum)
+void validateChecksum(CRC &activeCRC, const char *str, CRCType &checksum)
 {
 	if (strlen(str) > activeCRC.getNumBytes() * 2)
 	{
@@ -313,7 +312,7 @@ int main(int argc, char **argv)
 		totalSize += activeCRC->getNumBytes();
 	}
 	if (desiredPosition < 0 ||
-		desiredPosition + activeCRC->getNumBytes() > totalSize)
+		desiredPosition + ((File::OffsetType) activeCRC->getNumBytes()) > totalSize)
 	{
 		fputs("Patch position is located outside available input.\n", stderr);
 		exit(EXIT_FAILURE);

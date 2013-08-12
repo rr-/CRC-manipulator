@@ -6,10 +6,10 @@ extern int msglevel; /* the higher, the more messages... */
 #else
 	void __pmesg(
 		int level,
-		const char* file,
+		const char *file,
 		unsigned int line,
-		const char* function,
-		const char* format, ...)
+		const char *function,
+		const char *format, ...)
 	{
 		#ifdef NDEBUG
 		#else
