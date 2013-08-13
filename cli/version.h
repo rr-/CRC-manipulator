@@ -2,9 +2,16 @@
 #define VERSION_H
 
 #define MAJOR_VERSION 0
-#define MINOR_VERSION 25
+#define MINOR_VERSION 26
 
 /*
+ * Version 0.26:
+ * - Fixed -p argument
+ * - Fixed --overwrite argument
+ * - Removed pipe support (its performance was deplorable, anyway)
+ * - Better, simplified code
+ * - CLI compiles fine under linux, cygwin and mingw
+
  * Version 0.25:
  * - Support for files larger than 4GB
 
