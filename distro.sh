@@ -1,5 +1,5 @@
 #!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+. config.sh
 
 #get version
 defines=$(cat "$DIR/cli/version.h" | grep '#define' | grep -v 'VERSION_H')
@@ -12,14 +12,12 @@ mkdir "$DIR/tmp"
 
 #compile gui
 pushd gui
-	msbuild=$(cygpath 'C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe')
-	"$msbuild" *.sln /t:Rebuild /verbosity:quiet /nologo /p:Configuration=Release /p:OutputPath="$(cygpath -w $DIR/tmp)"
+	"$msbuild" *.sln /t:Rebuild /verbosity:quiet /nologo /p:Configuration=Release /p:OutputPath="$DIR/tmp"
 	rm -rf "$DIR/gui/obj"
 popd
 
 #compile cli
 pushd cli
-	gcc="g++"
 	"$gcc" {*/,}*.cpp -o "$DIR/tmp/crcmanip.exe"
 popd
 
