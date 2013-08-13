@@ -5,8 +5,8 @@
 
 class CRC32 : public CRC {
 	private:
-		uint32_t lookupTable [256];
-		uint32_t invLookupTable [256];
+		uint32_t lookupTable[256];
+		uint32_t invLookupTable[256];
 	protected:
 		virtual CRCType getPolynomial() const;
 		virtual CRCType getPolynomialReverse() const;

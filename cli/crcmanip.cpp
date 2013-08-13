@@ -25,7 +25,7 @@
 const char *getPathToSelf()
 {
 	const size_t bufferSize = 256;
-	static char buffer [bufferSize];
+	static char buffer[bufferSize];
 	if (false);
 	#if defined __linux__
 	else if (readlink("/proc/self/exe", buffer, bufferSize));
@@ -53,7 +53,7 @@ const char *getPathToSelf()
 const char *getVersion()
 {
 	const size_t bufferSize = 256;
-	static char buffer [bufferSize];
+	static char buffer[bufferSize];
 	sprintf(buffer, "%d.%d", MAJOR_VERSION, MINOR_VERSION);
 	return buffer;
 }

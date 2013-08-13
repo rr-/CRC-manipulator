@@ -109,7 +109,7 @@ CRC16CCITT::CRC16CCITT() : CRC()
 		}
 		crc2 &= 0xffff;
 		this->lookupTable[n] = crc1;
-		this->invLookupTable [n] = static_cast<uint16_t>(crc2);
+		this->invLookupTable[n] = static_cast<uint16_t>(crc2);
 	}
 }
 

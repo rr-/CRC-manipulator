@@ -6,8 +6,8 @@
 class CRC16IBM : public CRC
 {
 	private:
-		uint16_t lookupTable [256];
-		uint16_t invLookupTable [256];
+		uint16_t lookupTable[256];
+		uint16_t invLookupTable[256];
 	protected:
 		virtual CRCType getPolynomial() const;
 		virtual CRCType getPolynomialReverse() const;
