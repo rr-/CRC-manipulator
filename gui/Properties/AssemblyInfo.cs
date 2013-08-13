@@ -10,11 +10,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("crcmanip-gui")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("GUI wrapper for CRC manipulator")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("crcmanip-gui")]
-[assembly: AssemblyCopyright("Copyright 2012")]
+[assembly: AssemblyCopyright("(c) 2012-2013 Marcin Kurczewski")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
