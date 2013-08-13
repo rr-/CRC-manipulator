@@ -1,7 +1,8 @@
 CRC-manipulator
 ===============
 
-crcmanip - CRC checksum manipulator 0.25
+<pre>
+crcmanip - CRC checksum manipulator
 Freely manipulate CRC32 checksums through smart file patching.
 Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]
 
@@ -28,3 +29,4 @@ Examples:
 ./crcmanip input.txt - 1234abcd >output.txt
 ./crcmanip - output.txt 1234abcd <input.txt
 ./crcmanip - - 1234abcd <input.txt >output.txt
+</pre>
