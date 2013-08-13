@@ -12,13 +12,13 @@ mkdir "$DIR/tmp"
 
 #compile gui
 pushd gui
-	"$msbuild" *.sln /t:Rebuild /verbosity:quiet /nologo /p:Configuration=Release /p:OutputPath="$DIR/tmp"
+	"$MSBUILD" *.sln $MSBUILD_FLAGS /t:Rebuild /verbosity:quiet /nologo /p:Configuration=Release /p:OutputPath="$DIR/tmp"
 	rm -rf "$DIR/gui/obj"
 popd
 
 #compile cli
 pushd cli
-	"$gcc" {*/,}*.cpp -o "$DIR/tmp/crcmanip.exe"
+	"$GCC" $GCC_FLAGS {*/,}*.cpp -o "$DIR/tmp/crcmanip.exe"
 popd
 
 #compress exes
