@@ -254,7 +254,9 @@ int main(int argc, char **argv)
 			++ i;
 			if (strcmp(argv[i], "-0") != 0)
 			{
-				desiredPosition = atol(argv[i]);
+				desiredPosition = sizeof(desiredPosition) == sizeof(long long)
+					? atoll(argv[i])
+					: atol(argv[i]);
 				desiredPositionSpecified = true;
 			}
 			continue;
