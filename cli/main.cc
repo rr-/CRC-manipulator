@@ -5,7 +5,6 @@
     #error unknown platform
 #endif
 
-#include "debug.h"
 #include "version.h"
 #include "CRC/CRC.h"
 #include "CRC/CRC32.h"
@@ -320,10 +319,6 @@ int main(int argc, char **argv)
         fputs("Patch position is located outside available input.\n", stderr);
         exit(EXIT_FAILURE);
     }
-    pmesg(ERRLEV_DEBUG,
-        "Desired position: %lld (file size: %lld)\n",
-        desiredPosition,
-        inputFile->getFileSize());
 
     // Open the output file
     File *outputFile = NULL;

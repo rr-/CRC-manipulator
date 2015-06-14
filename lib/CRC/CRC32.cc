@@ -1,5 +1,4 @@
 #include "CRC32.h"
-#include "../debug.h"
 
 /**
  * NOTICE: following code is strongly based on SAR-PR-2006-05

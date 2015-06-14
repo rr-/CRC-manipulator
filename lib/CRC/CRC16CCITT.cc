@@ -1,5 +1,4 @@
 #include "CRC16CCITT.h"
-#include "../debug.h"
 
 CRCType CRC16CCITT::getPolynomial() const
 {

@@ -1,5 +1,4 @@
 #include "CRC16IBM.h"
-#include "../debug.h"
 
 CRCType CRC16IBM::getPolynomial() const
 {
