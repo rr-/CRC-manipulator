@@ -1,5 +1,4 @@
-.*.swp
-*.zip
-*.exe
-*.cache
-config.sh
+build
+waf
+.waf*
+.lock-waf*
