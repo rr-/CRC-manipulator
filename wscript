@@ -43,7 +43,6 @@ def build(ctx):
 
     lib_sources = ctx.path.ant_glob(lib_dir + '/**/*.cc')
     cli_sources = ctx.path.ant_glob(cli_dir + '/**/*.cc')
-    print(cli_sources)
 
     ctx.objects(
         source = lib_sources,
