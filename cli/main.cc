@@ -5,12 +5,6 @@
     #error unknown platform
 #endif
 
-#include "version.h"
-#include "CRC/CRC.h"
-#include "CRC/CRC32.h"
-#include "CRC/CRC16IBM.h"
-#include "CRC/CRC16CCITT.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +14,12 @@
 #ifndef __unix
     #include <sys/fcntl.h> // for setmode
 #endif
+
+#include "version.h"
+#include "CRC/CRC.h"
+#include "CRC/CRC32.h"
+#include "CRC/CRC16IBM.h"
+#include "CRC/CRC16CCITT.h"
 
 const char *getPathToSelf()
 {

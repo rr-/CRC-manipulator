@@ -1,6 +1,6 @@
 #include "File.h"
-#include <string.h>
-#include <assert.h>
+#include <cstring>
+#include <cassert>
 
 File *File::fromFileHandle(FILE *fileHandle)
 {
