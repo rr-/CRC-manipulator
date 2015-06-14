@@ -56,21 +56,14 @@ CRC32::CRC32() : CRC()
 		for (unsigned char k = 0; k < 8; k ++)
 		{
 			if (crc1 & 1)
-			{
 				crc1 = (crc1 >> 1) ^ this->getPolynomialReverse();
-			}
 			else
-			{
 				crc1 >>= 1;
-			}
+
 			if (crc2 & 0x80000000)
-			{
 				crc2 = ((crc2 ^ this->getPolynomialReverse()) << 1) | 1;
-			}
 			else
-			{
 				crc2 <<= 1;
-			}
 		}
 		this->lookupTable[n] = crc1;
 		this->invLookupTable[n] = crc2;
@@ -88,6 +81,7 @@ CRCType CRC32::computePatch(
 		0,
 		desiredPosition,
 		this->getInitialXOR());
+
 	uint32_t checksum2 = this->computeReversePartialChecksum(
 		inputFile,
 		inputFile.getFileSize(),
@@ -95,10 +89,8 @@ CRCType CRC32::computePatch(
 		(uint32_t) (desiredChecksum ^ this->getFinalXOR()));
 
 	uint32_t patch = checksum2;
-	size_t i, j;
-	for (i = 0, j = 3; i < 4; i ++, j --)
-	{
+	for (size_t i = 0, j = 3; i < 4; i ++, j --)
 		patch = this->makePrevChecksum(patch, (checksum1 >> (j << 3)) & 0xff);
-	}
+
 	return patch;
 }

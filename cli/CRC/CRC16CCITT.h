@@ -5,9 +5,9 @@
 
 class CRC16CCITT : public CRC
 {
-	private:
-		uint16_t lookupTable[256];
-		uint16_t invLookupTable[256];
+	public:
+		CRC16CCITT();
+
 	protected:
 		virtual CRCType getPolynomial() const;
 		virtual CRCType getPolynomialReverse() const;
@@ -27,8 +27,10 @@ class CRC16CCITT : public CRC
 			const File::OffsetType &desiredPosition,
 			File &inputFile,
 			const bool &overwrite) const;
-	public:
-		CRC16CCITT();
+
+	private:
+		uint16_t lookupTable[256];
+		uint16_t invLookupTable[256];
 };
 
 #endif

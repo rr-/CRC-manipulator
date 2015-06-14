@@ -1,7 +1,8 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-enum ErrorLevel {
+enum ErrorLevel
+{
 	ERRLEV_DEBUG,
 	ERRLEV_INFO,
 	ERRLEV_NOTICE,

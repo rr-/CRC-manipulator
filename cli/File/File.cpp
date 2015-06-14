@@ -8,29 +8,20 @@ File *File::fromFileHandle(FILE *fileHandle)
 	return new File(fileHandle);
 }
 
-
-
 File *File::fromFileName(const char *fileName, int openMode)
 {
 	char modeString[5];
 	strcpy(modeString, "");
-	if ((openMode & FOPEN_WRITE) && (openMode & FOPEN_READ))
-	{
-		strcat(modeString, "r+");
-	}
-	else if (openMode & FOPEN_WRITE)
-	{
-		strcat(modeString, "w");
-	}
-	else if (openMode & FOPEN_READ)
-	{
-		strcat(modeString, "r");
-	}
-	if (openMode & FOPEN_BINARY)
-	{
-		strcat(modeString, "b");
-	}
 
+	if ((openMode & FOPEN_WRITE) && (openMode & FOPEN_READ))
+		strcat(modeString, "r+");
+	else if (openMode & FOPEN_WRITE)
+		strcat(modeString, "w");
+	else if (openMode & FOPEN_READ)
+		strcat(modeString, "r");
+
+	if (openMode & FOPEN_BINARY)
+		strcat(modeString, "b");
 
 	assert(fileName != NULL);
 	FILE *fileHandle = fopen(fileName, modeString);
@@ -41,8 +32,6 @@ File *File::fromFileName(const char *fileName, int openMode)
 	}
 	return fromFileHandle(fileHandle);
 }
-
-
 
 File::File(FILE *fileHandle) : fileHandle(NULL)
 {
@@ -59,14 +48,10 @@ File::File(FILE *fileHandle) : fileHandle(NULL)
 	}
 }
 
-
-
 File::~File()
 {
 	fclose(this->fileHandle);
 }
-
-
 
 File &File::seek(
 	const OffsetType &offset,
@@ -117,8 +102,6 @@ File &File::seek(
 	return *this;
 }
 
-
-
 File::OffsetType File::tell() const
 {
 	off_t ret = ftello64(this->fileHandle);
@@ -129,8 +112,6 @@ File::OffsetType File::tell() const
 	}
 	return ((OffsetType) ret);
 }
-
-
 
 File &File::read(unsigned char *buffer, const size_t &size)
 {
@@ -154,8 +135,6 @@ File &File::read(unsigned char *buffer, const size_t &size)
 	return *this;
 }
 
-
-
 File &File::write(unsigned char *buffer, const size_t &size)
 {
 	if (fwrite(buffer, sizeof(unsigned char), size, this->fileHandle) != size)
@@ -173,14 +152,10 @@ File &File::write(unsigned char *buffer, const size_t &size)
 	return *this;
 }
 
-
-
 size_t File::getBufferSize() const
 {
 	return 8192;
 }
-
-
 
 File::OffsetType File::getFileSize() const
 {

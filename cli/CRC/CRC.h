@@ -29,17 +29,33 @@ class CRC
 		const static int ERR_NOT_IMPLEMENTED = 0;
 		const static int ERR_PATCH_FAILED = 1;
 
-	//Attributes
-	private:
-		CRCType finalXOR;
-		CRCType initialXOR;
-		void (*progressFunction)(
+		virtual size_t getNumBits() const = 0;
+		virtual size_t getNumBytes() const = 0;
+		virtual CRCType getPolynomial() const = 0;
+		virtual CRCType getPolynomialReverse() const = 0;
+
+		CRC();
+		virtual ~CRC();
+		const CRCType &getInitialXOR() const;
+		const CRCType &getFinalXOR() const;
+		void setInitialXOR(const CRCType &t);
+		void setFinalXOR(const CRCType &t);
+
+		void setProgressFunction(void(*function)(
 			const CRCProgressType &progressType,
 			const File::OffsetType &startPosition,
 			const File::OffsetType &currentPosition,
-			const File::OffsetType &endPosition);
+			const File::OffsetType &endPosition));
 
-	//Methods
+		CRCType computeChecksum(File &inputFile) const;
+
+		void applyPatch(
+			const CRCType &desiredCRC,
+			const File::OffsetType &desiredPosition,
+			File &inputFile,
+			File &outputFile,
+			const bool &overwrite = false) const;
+
 	protected:
 		void markProgress(
 			const CRCProgressType &progressType,
@@ -76,33 +92,15 @@ class CRC
 		virtual CRCType makePrevChecksum(
 			const CRCType &checksum,
 			unsigned char c) const = 0;
-	public:
-		virtual size_t getNumBits() const = 0;
-		virtual size_t getNumBytes() const = 0;
-		virtual CRCType getPolynomial() const = 0;
-		virtual CRCType getPolynomialReverse() const = 0;
 
-		CRC();
-		virtual ~CRC();
-		const CRCType &getInitialXOR() const;
-		const CRCType &getFinalXOR() const;
-		void setInitialXOR(const CRCType &t);
-		void setFinalXOR(const CRCType &t);
-
-		void setProgressFunction(void(*function)(
+	private:
+		CRCType finalXOR;
+		CRCType initialXOR;
+		void (*progressFunction)(
 			const CRCProgressType &progressType,
 			const File::OffsetType &startPosition,
 			const File::OffsetType &currentPosition,
-			const File::OffsetType &endPosition));
-
-		CRCType computeChecksum(File &inputFile) const;
-
-		void applyPatch(
-			const CRCType &desiredCRC,
-			const File::OffsetType &desiredPosition,
-			File &inputFile,
-			File &outputFile,
-			const bool &overwrite = false) const;
+			const File::OffsetType &endPosition);
 };
 
 #endif

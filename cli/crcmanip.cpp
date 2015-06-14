@@ -66,6 +66,7 @@ void updateProgress(
 {
 	static int i = 0;
 	static CRC::CRCProgressType lastProgressType;
+
 	if (lastProgressType != progressType || i == 0)
 	{
 		lastProgressType = progressType;
@@ -73,36 +74,39 @@ void updateProgress(
 		{
 			case CRC::CRCPROG_WRITE_START:
 				fprintf(stderr, "Output started\n");
-				fflush(stderr);
 				break;
+
 			case CRC::CRCPROG_WRITE_END:
 				fprintf(stderr, "Output ended\n");
-				fflush(stderr);
 				break;
+
 			case CRC::CRCPROG_CHECKSUM_START:
 				fprintf(stderr, "Partial checksum started\n");
-				fflush(stderr);
 				break;
+
 			case CRC::CRCPROG_CHECKSUM_END:
 				fprintf(stderr, "Partial checksum ended\n");
-				fflush(stderr);
 				break;
+
 			default:
 				break;
 		}
 	}
+
 	switch (progressType)
 	{
 		case CRC::CRCPROG_WRITE_PROGRESS:
 		case CRC::CRCPROG_CHECKSUM_PROGRESS:
 			if (i % 1000 == 0)
 			{
-				fprintf(stderr, "%6.02f%%\r",
+				fprintf(
+					stderr,
+					"%6.02f%%\r",
 					(curPos - startPos) * 100.0f / (endPos - startPos));
-				fflush(stderr);
 			}
 			++ i;
 			break;
+
 		default:
 			break;
 	}
@@ -222,6 +226,7 @@ int main(int argc, char **argv)
 		usage(stderr);
 		exit(EXIT_FAILURE);
 	}
+
 	uint32_t desiredChecksum = 0x12345678;
 	validateChecksum(*activeCRC, argv[3], desiredChecksum);
 
@@ -263,8 +268,6 @@ int main(int argc, char **argv)
 		}
 	}
 
-
-
 	// Open the input file
 	File *inputFile = NULL;
 	try
@@ -288,8 +291,6 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 	File::OffsetType totalSize = inputFile->getFileSize();
-
-
 
 	if (!desiredPositionSpecified)
 	{
@@ -324,8 +325,6 @@ int main(int argc, char **argv)
 		desiredPosition,
 		inputFile->getFileSize());
 
-
-
 	// Open the output file
 	File *outputFile = NULL;
 	try
@@ -349,8 +348,6 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-
-
 	// Perform desired operation
 	activeCRC->applyPatch(
 		desiredChecksum,
@@ -358,8 +355,6 @@ int main(int argc, char **argv)
 		*inputFile,
 		*outputFile,
 		overwrite);
-
-
 
 	// Cleanup
 	delete activeCRC;

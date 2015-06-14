@@ -1,56 +1,32 @@
 #include "CRC.h"
 
-/**
- * Constructor...
- */
 CRC::CRC()
 {
 }
 
-
-
-/**
- * Destructor...
- */
 CRC::~CRC()
 {
 }
-
-
-
-/**
- * Getters
- */
 
 const CRCType &CRC::getInitialXOR() const
 {
 	return this->initialXOR;
 }
 
-
-
 const CRCType &CRC::getFinalXOR() const
 {
 	return this->finalXOR;
 }
-
-/**
- * Setters
- */
 
 void CRC::setInitialXOR(const CRCType &f)
 {
 	this->initialXOR = f;
 }
 
-
-
 void CRC::setFinalXOR(const CRCType &f)
 {
 	this->finalXOR = f;
 }
-
-
 
 void CRC::setProgressFunction(
 	void(*function)(const CRCProgressType &progressType,
@@ -60,8 +36,6 @@ void CRC::setProgressFunction(
 {
 	this->progressFunction = function;
 }
-
-
 
 /**
  * Method that copies the input to the output, outputting
@@ -134,8 +108,6 @@ void CRC::applyPatch(
 	delete []buffer;
 }
 
-
-
 /**
  * Computes the checksum of given file.
  * NOTICE: Leaves internal file pointer position intact.
@@ -150,8 +122,6 @@ CRCType CRC::computeChecksum(File &input) const
 		checksum);
 	return checksum ^ this->getFinalXOR();
 }
-
-
 
 /**
  * Computes partial checksum of given file.
@@ -197,8 +167,6 @@ CRCType CRC::computePartialChecksum(
 	return checksum;
 }
 
-
-
 /**
  * Computes reverse partial checksum of given file.
  * NOTICE: Leaves internal file pointer position intact.
@@ -242,8 +210,6 @@ CRCType CRC::computeReversePartialChecksum(
 	delete []buffer;
 	return checksum;
 }
-
-
 
 void CRC::markProgress(
 	const CRCProgressType &progressType,

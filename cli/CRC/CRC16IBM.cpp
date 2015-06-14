@@ -52,21 +52,14 @@ CRC16IBM::CRC16IBM() : CRC()
 		for (uint8_t k = 0; k < 8; k ++)
 		{
 			if ((crc1 ^ (n >> k)) & 1)
-			{
 				crc1 = (crc1 >> 1) ^ this->getPolynomialReverse();
-			}
 			else
-			{
 				crc1 >>= 1;
-			}
+
 			if ((crc2 ^ (n << (8 + k))) & 0x8000)
-			{
 				crc2 = (crc2 ^ this->getPolynomialReverse()) << 1 | 1;
-			}
 			else
-			{
 				crc2 <<= 1;
-			}
 		}
 		this->lookupTable[n] = crc1;
 		this->invLookupTable[n] = crc2;
@@ -84,6 +77,7 @@ CRCType CRC16IBM::computePatch(
 		0,
 		desiredPosition,
 		this->getInitialXOR());
+
 	uint16_t checksum2 = this->computeReversePartialChecksum(
 		inputFile,
 		inputFile.getFileSize(),
@@ -91,11 +85,8 @@ CRCType CRC16IBM::computePatch(
 		(uint16_t) (desiredChecksum ^ this->getFinalXOR()));
 
 	uint16_t patch = checksum2;
-	size_t i, j;
-	for (i = 0, j = 1; i < 2; i ++, j --)
-	{
-		//differrent order to CRC32
+	for (size_t i = 0, j = 1; i < 2; i ++, j --)
 		patch = this->makePrevChecksum(patch,(checksum1 >> (j << 3)) & 0xff);
-	}
+
 	return patch;
 }

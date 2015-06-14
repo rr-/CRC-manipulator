@@ -3,10 +3,11 @@
 
 #include "CRC.h"
 
-class CRC32 : public CRC {
-	private:
-		uint32_t lookupTable[256];
-		uint32_t invLookupTable[256];
+class CRC32 : public CRC
+{
+	public:
+		CRC32();
+
 	protected:
 		virtual CRCType getPolynomial() const;
 		virtual CRCType getPolynomialReverse() const;
@@ -26,8 +27,10 @@ class CRC32 : public CRC {
 			const File::OffsetType &desiredPosition,
 			File &inputFile,
 			const bool &overwrite) const;
-	public:
-		CRC32();
+
+	private:
+		uint32_t lookupTable[256];
+		uint32_t invLookupTable[256];
 };
 
 #endif
