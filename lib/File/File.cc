@@ -73,7 +73,7 @@ File &File::seek(
     }
 
     if (this->getFileSize() == -1)
-        return *this;
+        throw ERR_UNSEEKABLE_STREAM;
 
     if (destination < 0 || destination > this->getFileSize())
         throw ERR_INVALID_POSITION;

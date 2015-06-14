@@ -32,6 +32,7 @@ class File
         const static int ERR_INVALID_PARAMETER = 4;
         const static int ERR_IO_ERROR = 5;
         const static int ERR_NOT_IMPLEMENTED = 6;
+        const static int ERR_UNSEEKABLE_STREAM = 7;
 
     private:
         FILE* fileHandle;
