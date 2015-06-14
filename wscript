@@ -6,7 +6,7 @@ APPNAME = 'crcmanip'
 VERSION = '0.26'
 
 def options(ctx):
-    ctx.load('compiler_cxx')
+    ctx.load(['compiler_cxx', 'qt4'])
 
     ctx.add_option(
         '-d',
@@ -30,19 +30,22 @@ def configure_flags(ctx):
     else:
         Logs.info('Debug information disabled, pass -d to enable')
 
-    ctx.load('compiler_cxx')
-
 def configure(ctx):
+    ctx.load(['compiler_cxx', 'qt4'])
     configure_flags(ctx)
 
 def build(ctx):
     lib_dir = 'lib'
     cli_dir = 'cli'
+    gui_dir = 'gui'
     lib_path = ctx.path.find_node(lib_dir).abspath()
     cli_path = ctx.path.find_node(cli_dir).abspath()
+    gui_path = ctx.path.find_node(gui_dir).abspath()
 
     lib_sources = ctx.path.ant_glob(lib_dir + '/**/*.cc')
     cli_sources = ctx.path.ant_glob(cli_dir + '/**/*.cc')
+    gui_sources = ctx.path.ant_glob(gui_dir + '/**/*.cc') \
+                + ctx.path.ant_glob(gui_dir + '/**/*.ui')
 
     ctx.objects(
         source = lib_sources,
@@ -56,6 +59,15 @@ def build(ctx):
         use = [
             'lib',
         ])
+
+    ctx.program(
+        source   = gui_sources,
+        target   = 'crcmanip-gui',
+        features = [ 'qt4' ],
+        cxxflags = ['-iquote', gui_path, '-iquote', lib_path],
+        includes = [ '.' ],
+        defines  = [ 'WAF' ],
+        use      = [ 'QTCORE', 'QTGUI', 'lib', ])
 
 def dist(ctx):
     ctx.algo = 'zip'
