@@ -40,8 +40,8 @@ def build(ctx):
 	lib_path = ctx.path.find_node(lib_dir).abspath()
 	cli_path = ctx.path.find_node(cli_dir).abspath()
 
-	lib_sources = ctx.path.ant_glob(lib_dir + '/**/*.cpp')
-	cli_sources = ctx.path.ant_glob(cli_dir + '/**/*.cpp')
+	lib_sources = ctx.path.ant_glob(lib_dir + '/**/*.cc')
+	cli_sources = ctx.path.ant_glob(cli_dir + '/**/*.cc')
 	print(cli_sources)
 
 	ctx.objects(
