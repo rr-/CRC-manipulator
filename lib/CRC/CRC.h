@@ -23,7 +23,7 @@ class CRC
             CRCPROG_WRITE_END,
             CRCPROG_CHECKSUM_START,
             CRCPROG_CHECKSUM_PROGRESS,
-            CRCPROG_CHECKSUM_END,
+            CRCPROG_CHECKSUM_END
         };
         const static int ERR_NOT_IMPLEMENTED = 0;
         const static int ERR_PATCH_FAILED = 1;

@@ -17,7 +17,7 @@
 #include <limits.h>
 #include <unistd.h>
 
-#if !defined (unix)
+#ifndef __unix
     #include <sys/fcntl.h> // for setmode
 #endif
 
@@ -156,14 +156,14 @@ void validateChecksum(CRC &activeCRC, const char *str, CRCType &checksum)
     if (strlen(str) > activeCRC.getNumBytes() * 2)
     {
         fprintf(stderr,
-            "Error: Specified checksum has more than %d digits.\n",
+            "Error: Specified checksum has more than %zd digits.\n",
             activeCRC.getNumBytes() * 2);
         exit(EXIT_FAILURE);
     }
     if (strlen(str) < activeCRC.getNumBytes() * 2)
     {
         fprintf(stderr,
-            "Warning: specified checksum has less than %d digits. "
+            "Warning: specified checksum has less than %zd digits. "
             "Resulting checksum will be padded with 0.\n",
             activeCRC.getNumBytes() * 2);
     }
@@ -273,7 +273,7 @@ int main(int argc, char **argv)
     {
         if (pathIn == NULL)
         {
-            #if !defined (unix)
+            #ifndef __unix
                 setmode(fileno(stdin), O_BINARY);
             #endif
             inputFile = File::fromFileHandle(stdin);
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
     {
         if (pathOut == NULL)
         {
-            #if !defined (unix)
+            #ifndef __unix
                 setmode(fileno(stdout), O_BINARY);
             #endif
             outputFile = File::fromFileHandle(stdout);

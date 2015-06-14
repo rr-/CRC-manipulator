@@ -18,9 +18,10 @@ def options(ctx):
 
 def configure_flags(ctx):
     ctx.env.CXXFLAGS = [
-        #'-Wall',
-        #'-Wextra',
-        #'-pedantic'
+        '-Wall',
+        '-Wextra',
+        '-pedantic',
+        '--std=c++11',
     ]
 
     if ctx.options.debug:
