@@ -19,11 +19,6 @@ size_t CRC32::getNumBytes() const
     return 4;
 }
 
-size_t CRC32::getNumBits() const
-{
-    return 32;
-}
-
 CRCType CRC32::makeNextChecksum(
     const CRCType &prevChecksum,
     unsigned char c) const

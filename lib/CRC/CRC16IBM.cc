@@ -15,11 +15,6 @@ size_t CRC16IBM::getNumBytes() const
     return 2;
 }
 
-size_t CRC16IBM::getNumBits() const
-{
-    return 16;
-}
-
 CRCType CRC16IBM::makeNextChecksum(
     const CRCType &prevChecksum,
     unsigned char c) const

@@ -28,7 +28,6 @@ class CRC
         const static int ERR_NOT_IMPLEMENTED = 0;
         const static int ERR_PATCH_FAILED = 1;
 
-        virtual size_t getNumBits() const = 0;
         virtual size_t getNumBytes() const = 0;
         virtual CRCType getPolynomial() const = 0;
         virtual CRCType getPolynomialReverse() const = 0;

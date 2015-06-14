@@ -15,11 +15,6 @@ size_t CRC16CCITT::getNumBytes() const
     return 2;
 }
 
-size_t CRC16CCITT::getNumBits() const
-{
-    return 16;
-}
-
 CRCType CRC16CCITT::makeNextChecksum(
     const CRCType &prevChecksum,
     unsigned char c) const

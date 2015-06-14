@@ -12,7 +12,6 @@ class CRC16IBM : public CRC
         virtual CRCType getPolynomial() const;
         virtual CRCType getPolynomialReverse() const;
         virtual size_t getNumBytes() const;
-        virtual size_t getNumBits() const;
 
         virtual CRCType makeNextChecksum(
             const CRCType &prevChecksum,
