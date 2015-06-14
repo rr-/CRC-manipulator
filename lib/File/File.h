@@ -2,56 +2,56 @@
 #define FILE_H
 
 #if defined __CYGWIN__
-	#define _FILE_OFFSET_BITS 64
-	#define fseeko64(a,b,c) fseeko(a,b,c)
-	#define ftello64(a) ftello(a)
-	#define off64_t off_t
+    #define _FILE_OFFSET_BITS 64
+    #define fseeko64(a,b,c) fseeko(a,b,c)
+    #define ftello64(a) ftello(a)
+    #define off64_t off_t
 #endif
 #include <stdio.h>
 
 class File
 {
-	public:
-		typedef off64_t OffsetType;
-		enum SeekOrigin
-		{
-			FSEEK_BEGINNING,
-			FSEEK_AHEAD,
-			FSEEK_BEHIND,
-			FSEEK_END
-		};
-		enum OpenMode
-		{
-			FOPEN_READ = 1,
-			FOPEN_WRITE = 2,
-			FOPEN_BINARY = 4
-		};
-		const static int ERR_INSUFFICIENT_MEMORY = 1;
-		const static int ERR_INSUFFICIENT_CONTENT = 2;
-		const static int ERR_INVALID_POSITION = 3;
-		const static int ERR_INVALID_PARAMETER = 4;
-		const static int ERR_IO_ERROR = 5;
-		const static int ERR_NOT_IMPLEMENTED = 6;
+    public:
+        typedef off64_t OffsetType;
+        enum SeekOrigin
+        {
+            FSEEK_BEGINNING,
+            FSEEK_AHEAD,
+            FSEEK_BEHIND,
+            FSEEK_END
+        };
+        enum OpenMode
+        {
+            FOPEN_READ = 1,
+            FOPEN_WRITE = 2,
+            FOPEN_BINARY = 4
+        };
+        const static int ERR_INSUFFICIENT_MEMORY = 1;
+        const static int ERR_INSUFFICIENT_CONTENT = 2;
+        const static int ERR_INVALID_POSITION = 3;
+        const static int ERR_INVALID_PARAMETER = 4;
+        const static int ERR_IO_ERROR = 5;
+        const static int ERR_NOT_IMPLEMENTED = 6;
 
-	private:
-		FILE* fileHandle;
-		OffsetType fileSize;
+    private:
+        FILE* fileHandle;
+        OffsetType fileSize;
 
-	protected:
-		File(FILE* fileHandle);
+    protected:
+        File(FILE* fileHandle);
 
-	public:
-		~File();
+    public:
+        ~File();
 
-		size_t getBufferSize() const;
-		OffsetType getFileSize() const;
-		OffsetType tell() const;
-		File &seek(const OffsetType &offset, SeekOrigin origin);
-		File &read(unsigned char* buffer, const size_t &size);
-		File &write(unsigned char* buffer, const size_t &size);
+        size_t getBufferSize() const;
+        OffsetType getFileSize() const;
+        OffsetType tell() const;
+        File &seek(const OffsetType &offset, SeekOrigin origin);
+        File &read(unsigned char* buffer, const size_t &size);
+        File &write(unsigned char* buffer, const size_t &size);
 
-		static File* fromFileHandle(FILE* fileHandle);
-		static File* fromFileName(const char* fileName, int openMode);
+        static File* fromFileHandle(FILE* fileHandle);
+        static File* fromFileName(const char* fileName, int openMode);
 };
 
 #endif
