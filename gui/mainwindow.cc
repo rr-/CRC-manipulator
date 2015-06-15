@@ -28,6 +28,15 @@ void MainWindow::on_inputPathPushButton_clicked()
         return;
 
     ui->inputPathLineEdit->setText(inputPath);
+
+    if (ui->outputPathLineEdit->text() == "")
+    {
+        auto inputFileInfo = QFileInfo(inputPath);
+        auto outputPath = inputFileInfo.baseName() + "-patched";
+        if (inputFileInfo.completeSuffix() != "")
+            outputPath += "." + inputFileInfo.completeSuffix();
+        ui->outputPathLineEdit->setText(outputPath);
+    }
 }
 
 void MainWindow::on_outputPathPushButton_clicked()
