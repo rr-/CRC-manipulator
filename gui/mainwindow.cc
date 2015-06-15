@@ -1,5 +1,6 @@
 #include <QFileDialog>
 #include <memory>
+#include <stdexcept>
 #include "lib/CRC/CRC32.h"
 #include "lib/File/File.h"
 #include "mainwindow.h"
@@ -67,12 +68,30 @@ void MainWindow::on_patchPushButton_clicked()
         std::string outputPath = ui->outputPathLineEdit->text().toStdString();
 
         std::unique_ptr<CRC> crc(new CRC32);
+        std::unique_ptr<File> inputFile;
+        std::unique_ptr<File> outputFile;
 
-        std::unique_ptr<File> inputFile(File::fromFileName(
-            inputPath.c_str(), File::FOPEN_READ | File::FOPEN_BINARY));
+        try
+        {
+            inputFile.reset(File::fromFileName(
+                inputPath.c_str(), File::FOPEN_READ | File::FOPEN_BINARY));
+        }
+        catch (...)
+        {
+            changeStatus(*ui, "Can't open input file.");
+            return;
+        }
 
-        std::unique_ptr<File> outputFile(File::fromFileName(
-            outputPath.c_str(), File::FOPEN_WRITE | File::FOPEN_BINARY));
+        try
+        {
+            outputFile.reset(File::fromFileName(
+                outputPath.c_str(), File::FOPEN_WRITE | File::FOPEN_BINARY));
+        }
+        catch (...)
+        {
+            changeStatus(*ui, "Can't open output file.");
+            return;
+        }
 
         File::OffsetType desiredPosition = inputFile->getFileSize();
 
@@ -89,11 +108,7 @@ void MainWindow::on_patchPushButton_clicked()
     }
     catch (std::exception &ex)
     {
-        changeStatus(*ui, ex.what());
-    }
-    catch (...)
-    {
-        changeStatus(*ui, "An error occured.");
+        changeStatus(*ui, std::string(ex.what()) + ".");
     }
 }
 

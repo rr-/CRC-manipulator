@@ -26,13 +26,6 @@ class File
             FOPEN_WRITE = 2,
             FOPEN_BINARY = 4
         };
-        const static int ERR_INSUFFICIENT_MEMORY = 1;
-        const static int ERR_INSUFFICIENT_CONTENT = 2;
-        const static int ERR_INVALID_POSITION = 3;
-        const static int ERR_INVALID_PARAMETER = 4;
-        const static int ERR_IO_ERROR = 5;
-        const static int ERR_NOT_IMPLEMENTED = 6;
-        const static int ERR_UNSEEKABLE_STREAM = 7;
 
     private:
         FILE* fileHandle;
