@@ -1,5 +1,7 @@
-#include <cstdio>
 #include <QFileDialog>
+#include <memory>
+#include "lib/CRC/CRC32.h"
+#include "lib/File/File.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -52,7 +54,35 @@ void MainWindow::on_outputPathPushButton_clicked()
 
 void MainWindow::on_patchPushButton_clicked()
 {
-    puts("patch");
+    try
+    {
+        uint32_t desiredChecksum = ui->crcLineEdit->text().toULong(nullptr, 16);
+        std::string inputPath = ui->inputPathLineEdit->text().toStdString();
+        std::string outputPath = ui->outputPathLineEdit->text().toStdString();
+
+        std::unique_ptr<CRC> crc(new CRC32);
+
+        std::unique_ptr<File> inputFile(File::fromFileName(
+            inputPath.c_str(), File::FOPEN_READ | File::FOPEN_BINARY));
+
+        std::unique_ptr<File> outputFile(File::fromFileName(
+            outputPath.c_str(), File::FOPEN_WRITE | File::FOPEN_BINARY));
+
+        File::OffsetType desiredPosition = inputFile->getFileSize();
+
+        crc->applyPatch(
+            desiredChecksum,
+            desiredPosition,
+            *inputFile,
+            *outputFile,
+            false);
+
+        puts("Done!"); //TODO
+    }
+    catch (...)
+    {
+        puts("Error..."); //TODO
+    }
 }
 
 #ifdef WAF
