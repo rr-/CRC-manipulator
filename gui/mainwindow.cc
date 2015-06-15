@@ -1,6 +1,12 @@
 #include <cstdio>
+#include <QFileDialog>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+
+namespace
+{
+    QString filters("All files (*.*)");
+}
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,12 +21,24 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_inputPathPushButton_clicked()
 {
-    puts("input");
+    QString inputPath = QFileDialog::getOpenFileName(
+        0, "Load file", QDir::currentPath(), filters);
+
+    if (inputPath == nullptr)
+        return;
+
+    ui->inputPathLineEdit->setText(inputPath);
 }
 
 void MainWindow::on_outputPathPushButton_clicked()
 {
-    puts("output");
+    QString outputPath = QFileDialog::getSaveFileName(
+        0, "Save file", QDir::currentPath(), filters);
+
+    if (outputPath == nullptr)
+        return;
+
+    ui->outputPathLineEdit->setText(outputPath);
 }
 
 void MainWindow::on_patchPushButton_clicked()
