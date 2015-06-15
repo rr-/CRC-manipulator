@@ -21,6 +21,7 @@ private slots:
     void on_inputPathPushButton_clicked();
     void on_outputPathPushButton_clicked();
     void on_patchPushButton_clicked();
+    void pathLineEdits_textChanged();
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;

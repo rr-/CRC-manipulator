@@ -22,10 +22,20 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     changeStatus(*ui, "Ready");
+
+    connect(ui->inputPathLineEdit, SIGNAL(textChanged(const QString &)),
+        this, SLOT(pathLineEdits_textChanged()));
+    connect(ui->outputPathLineEdit, SIGNAL(textChanged(const QString &)),
+        this, SLOT(pathLineEdits_textChanged()));
 }
 
 MainWindow::~MainWindow()
 {
+}
+
+void MainWindow::pathLineEdits_textChanged()
+{
+    changeStatus(*ui, "Ready");
 }
 
 void MainWindow::on_inputPathPushButton_clicked()
