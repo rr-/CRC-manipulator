@@ -26,6 +26,8 @@ def configure_flags(ctx):
 
     if ctx.options.debug:
         ctx.env.CXXFLAGS += ['-g']
+        if 'gcc' in ctx.env.CXX_NAME or 'g++' in ctx.env.CXX_NAME:
+            ctx.env.CXXFLAGS += ['-ggdb']
         Logs.info('Debug information enabled')
     else:
         Logs.info('Debug information disabled, pass -d to enable')
