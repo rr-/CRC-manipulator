@@ -21,7 +21,8 @@ private slots:
     void on_inputPathPushButton_clicked();
     void on_outputPathPushButton_clicked();
     void on_patchPushButton_clicked();
-    void pathLineEdits_textChanged();
+    void on_inputPathLineEdit_textChanged(const QString &);
+    void on_outputPathLineEdit_textChanged(const QString &);
 
 private:
     std::unique_ptr<Ui::MainWindow> ui;

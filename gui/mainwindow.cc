@@ -22,18 +22,26 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     changeStatus(*ui, "Ready");
-
-    connect(ui->inputPathLineEdit, SIGNAL(textChanged(const QString &)),
-        this, SLOT(pathLineEdits_textChanged()));
-    connect(ui->outputPathLineEdit, SIGNAL(textChanged(const QString &)),
-        this, SLOT(pathLineEdits_textChanged()));
 }
 
 MainWindow::~MainWindow()
 {
 }
 
-void MainWindow::pathLineEdits_textChanged()
+void MainWindow::on_inputPathLineEdit_textChanged(const QString &newText)
+{
+    changeStatus(*ui, "Ready");
+    if (ui->outputPathLineEdit->text() == "")
+    {
+        auto inputFileInfo = QFileInfo(newText);
+        auto outputPath = inputFileInfo.baseName() + "-patched";
+        if (inputFileInfo.completeSuffix() != "")
+            outputPath += "." + inputFileInfo.completeSuffix();
+        ui->outputPathLineEdit->setText(outputPath);
+    }
+}
+
+void MainWindow::on_outputPathLineEdit_textChanged(const QString &)
 {
     changeStatus(*ui, "Ready");
 }
@@ -43,19 +51,8 @@ void MainWindow::on_inputPathPushButton_clicked()
     QString inputPath = QFileDialog::getOpenFileName(
         ui->centralWidget, "Load file", QDir::currentPath(), filters);
 
-    if (inputPath == nullptr)
-        return;
-
-    ui->inputPathLineEdit->setText(inputPath);
-
-    if (ui->outputPathLineEdit->text() == "")
-    {
-        auto inputFileInfo = QFileInfo(inputPath);
-        auto outputPath = inputFileInfo.baseName() + "-patched";
-        if (inputFileInfo.completeSuffix() != "")
-            outputPath += "." + inputFileInfo.completeSuffix();
-        ui->outputPathLineEdit->setText(outputPath);
-    }
+    if (inputPath != nullptr)
+        ui->inputPathLineEdit->setText(inputPath);
 }
 
 void MainWindow::on_outputPathPushButton_clicked()
@@ -63,10 +60,8 @@ void MainWindow::on_outputPathPushButton_clicked()
     QString outputPath = QFileDialog::getSaveFileName(
         ui->centralWidget, "Save file", QDir::currentPath(), filters);
 
-    if (outputPath == nullptr)
-        return;
-
-    ui->outputPathLineEdit->setText(outputPath);
+    if (outputPath != nullptr)
+        ui->outputPathLineEdit->setText(outputPath);
 }
 
 void MainWindow::on_patchPushButton_clicked()
