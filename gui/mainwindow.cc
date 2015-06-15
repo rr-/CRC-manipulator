@@ -24,7 +24,7 @@ MainWindow::~MainWindow()
 void MainWindow::on_inputPathPushButton_clicked()
 {
     QString inputPath = QFileDialog::getOpenFileName(
-        0, "Load file", QDir::currentPath(), filters);
+        ui->centralWidget, "Load file", QDir::currentPath(), filters);
 
     if (inputPath == nullptr)
         return;
@@ -44,7 +44,7 @@ void MainWindow::on_inputPathPushButton_clicked()
 void MainWindow::on_outputPathPushButton_clicked()
 {
     QString outputPath = QFileDialog::getSaveFileName(
-        0, "Save file", QDir::currentPath(), filters);
+        ui->centralWidget, "Save file", QDir::currentPath(), filters);
 
     if (outputPath == nullptr)
         return;
