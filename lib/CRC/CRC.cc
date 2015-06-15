@@ -2,6 +2,7 @@
 
 CRC::CRC()
 {
+    progressFunction = NULL;
 }
 
 CRC::~CRC()
