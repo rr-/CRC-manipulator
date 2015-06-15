@@ -8,6 +8,11 @@
 namespace
 {
     QString filters("All files (*.*)");
+
+    void changeStatus(Ui::MainWindow &ui, const std::string &message)
+    {
+        ui.statusLabel->setText(QString::fromStdString(message));
+    }
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -15,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    changeStatus(*ui, "Ready");
 }
 
 MainWindow::~MainWindow()
@@ -70,6 +76,8 @@ void MainWindow::on_patchPushButton_clicked()
 
         File::OffsetType desiredPosition = inputFile->getFileSize();
 
+        changeStatus(*ui, "Working...");
+
         crc->applyPatch(
             desiredChecksum,
             desiredPosition,
@@ -77,11 +85,15 @@ void MainWindow::on_patchPushButton_clicked()
             *outputFile,
             false);
 
-        puts("Done!"); //TODO
+        changeStatus(*ui, "Done!");
+    }
+    catch (std::exception &ex)
+    {
+        changeStatus(*ui, ex.what());
     }
     catch (...)
     {
-        puts("Error..."); //TODO
+        changeStatus(*ui, "An error occured.");
     }
 }
 
