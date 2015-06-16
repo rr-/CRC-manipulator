@@ -16,13 +16,29 @@ def options(ctx):
         action = 'store_true',
         help = 'enable emitting debug information')
 
+    ctx.add_option(
+        '--static',
+        dest = 'static',
+        default = False,
+        action = 'store_true',
+        help = 'enable static linking')
+
 def configure_flags(ctx):
     ctx.env.CXXFLAGS = [
         '-Wall',
         '-Wextra',
         '-pedantic',
-        '--std=c++11',
+        '--std=c++11'
     ]
+
+    if ctx.options.static:
+        ctx.env.LINKFLAGS = [
+            '-static-libgcc',
+            '-static-libstdc++',
+        ]
+        Logs.info('Static linking enabled')
+    else:
+        Logs.info('Static linking disabled, pass --static to enable')
 
     if ctx.options.debug:
         ctx.env.CXXFLAGS += ['-g']
