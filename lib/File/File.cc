@@ -79,8 +79,16 @@ File &File::seek(OffsetType offset, Origin origin)
             throw std::invalid_argument("Bad offset type");
     }
 
-    int result = fseeko64(fileHandle, destination, type);
-    if (result != 0)
+    #if HAVE_FSEEKO64
+        auto ret = fseeko64(fileHandle, destination, type);
+    #elif HAVE_FSEEKI64
+        auto ret = _fseeki64(fileHandle, destination, type);
+    #elif HAVE_FSEEKO
+        auto ret = fseeko(fileHandle, destination, type);
+    #else
+        auto ret = fseek(fileHandle, destination, type);
+    #endif
+    if (ret != 0)
         throw std::runtime_error("Failed to seek file");
 
     return *this;
@@ -88,7 +96,15 @@ File &File::seek(OffsetType offset, Origin origin)
 
 File::OffsetType File::tell() const
 {
-    off_t ret = ftello64(fileHandle);
+    #if HAVE_FSEEKO64
+        auto ret = ftello64(fileHandle);
+    #elif HAVE_FSEEKI64
+        auto ret = _ftelli64(fileHandle);
+    #elif HAVE_FSEEKO
+        auto ret = ftello(fileHandle);
+    #else
+        auto ret = ftell(fileHandle);
+    #endif
     if (ret == -1L)
         throw std::runtime_error("Stream is unseekable");
     return ret;

@@ -32,9 +32,27 @@ def configure_flags(ctx):
     else:
         Logs.info('Debug information disabled, pass -d to enable')
 
+def configure_features(ctx):
+    seek_funcs = ['fseeko64', 'fseeko', '_fseeki64']
+    for f in seek_funcs:
+        ctx.check_cxx(
+            msg = 'Checking for ' + f + ' support',
+            fragment = "#include <cstdio>\nint main(){" + f + '(0, 0, 0); }',
+            define_name = f.strip('_').upper(),
+            mandatory = False)
+
+    ctx.check_cxx(
+        msg = 'Checking for off64_t support',
+        fragment = "#include <cstdio>\nint main(){off64_t x=0;}",
+        define_name = 'OFF64T',
+        mandatory = False)
+
 def configure(ctx):
-    ctx.load(['compiler_cxx', 'qt4'])
+    ctx.load(['compiler_cxx'])
     configure_flags(ctx)
+    configure_features(ctx)
+    ctx.load(['qt4'])
+    ctx.write_config_header('config.h')
 
 def build(ctx):
     lib_dir = 'lib'
@@ -50,17 +68,16 @@ def build(ctx):
                 + ctx.path.ant_glob(gui_dir + '/**/*.ui')
 
     ctx.objects(
-        source = lib_sources,
-        target = 'lib',
+        source   = lib_sources,
+        target   = 'lib',
         cxxflags = ['-iquote', lib_path])
 
     ctx.program(
-        source = cli_sources,
-        target = 'crcmanip-cli',
+        source   = cli_sources,
+        target   = 'crcmanip-cli',
         cxxflags = ['-iquote', cli_path, '-iquote', lib_path],
-        use = [
-            'lib',
-        ])
+        includes = ['.'],
+        use      = [ 'lib', ])
 
     ctx.program(
         source   = gui_sources,
