@@ -1,7 +1,7 @@
 #include <QFileDialog>
 #include <QThread>
-#include <memory>
 #include <functional>
+#include <memory>
 #include <stdexcept>
 #include "lib/CRC/CRC32.h"
 #include "lib/File/File.h"
@@ -62,10 +62,10 @@ namespace
             void run()
             {
                 crc->setProgressFunction([&](
-                    const CRC::CRCProgressType &,
-                    const File::OffsetType &startPosition,
-                    const File::OffsetType &currentPosition,
-                    const File::OffsetType &maxPosition)
+                    CRC::ProgressType,
+                    File::OffsetType startPosition,
+                    File::OffsetType currentPosition,
+                    File::OffsetType maxPosition)
                 {
                     double progress = 0;
                     if (maxPosition != startPosition)
@@ -149,7 +149,7 @@ void MainWindow::on_patchPushButton_clicked()
 {
     workStarted();
 
-    auto desiredChecksum = ui->crcLineEdit->text().toULong(nullptr, 16);
+    auto targetChecksum = ui->crcLineEdit->text().toULong(nullptr, 16);
     auto inputPath = ui->inputPathLineEdit->text().toStdString();
     auto outputPath = ui->outputPathLineEdit->text().toStdString();
 
@@ -159,8 +159,8 @@ void MainWindow::on_patchPushButton_clicked()
 
     try
     {
-        inputFile.reset(File::fromFileName(
-            inputPath.c_str(), File::FOPEN_READ | File::FOPEN_BINARY));
+        inputFile = File::fromFileName(
+            inputPath, File::Mode::Read | File::Mode::Binary);
     }
     catch (...)
     {
@@ -170,8 +170,8 @@ void MainWindow::on_patchPushButton_clicked()
 
     try
     {
-        outputFile.reset(File::fromFileName(
-            outputPath.c_str(), File::FOPEN_WRITE | File::FOPEN_BINARY));
+        outputFile = File::fromFileName(
+            outputPath, File::Mode::Write | File::Mode::Binary);
     }
     catch (...)
     {
@@ -179,14 +179,14 @@ void MainWindow::on_patchPushButton_clicked()
         return;
     }
 
-    File::OffsetType desiredPosition = inputFile->getFileSize();
+    File::OffsetType targetPosition = inputFile->getSize();
 
     Patcher *patcher = new Patcher(
         std::move(crc),
         std::move(inputFile),
         std::move(outputFile),
-        desiredChecksum,
-        desiredPosition);
+        targetChecksum,
+        targetPosition);
 
     connect(
         patcher, SIGNAL(progressChanged(double)),

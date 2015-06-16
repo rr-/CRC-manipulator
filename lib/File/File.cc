@@ -1,84 +1,85 @@
-#include "File.h"
-#include <cstring>
-#include <cassert>
-#include <string>
-#include <stdexcept>
+#include "File/File.h"
 
-File *File::fromFileHandle(FILE *fileHandle)
+std::unique_ptr<File> File::fromFileHandle(FILE *fileHandle)
 {
-    return new File(fileHandle);
+    return std::unique_ptr<File>(new File(fileHandle));
 }
 
-File *File::fromFileName(const char *fileName, int openMode)
+std::unique_ptr<File> File::fromFileName(
+    const std::string &fileName, int mode)
 {
-    char modeString[5];
-    strcpy(modeString, "");
+    std::string modeString;
 
-    if ((openMode & FOPEN_WRITE) && (openMode & FOPEN_READ))
-        strcat(modeString, "r+");
-    else if (openMode & FOPEN_WRITE)
-        strcat(modeString, "w");
-    else if (openMode & FOPEN_READ)
-        strcat(modeString, "r");
+    if ((mode & Mode::Write) && (mode & Mode::Read))
+        modeString += "r+";
+    else if (mode & Mode::Write)
+        modeString += "w";
+    else if (mode & Mode::Read)
+        modeString += "r";
 
-    if (openMode & FOPEN_BINARY)
-        strcat(modeString, "b");
+    if (mode & Mode::Binary)
+        modeString += "b";
 
-    assert(fileName != NULL);
-    FILE *fileHandle = fopen(fileName, modeString);
-    if (fileHandle == NULL)
+    FILE *fileHandle = fopen(fileName.c_str(), modeString.c_str());
+    if (fileHandle == nullptr)
         throw std::runtime_error("Couldn't open file");
     return fromFileHandle(fileHandle);
 }
 
-File::File(FILE *fileHandle) : fileHandle(NULL)
+File::File(FILE *fileHandle) : fileHandle(fileHandle)
 {
-    this->fileHandle = fileHandle;
-
-    bool ok = true;
-    ok &= (fseeko64(this->fileHandle, 0, SEEK_END) != -1);
-    ok &= ((this->fileSize = ftello64(this->fileHandle)) != -1);
-    ok &= (fseeko64(this->fileHandle, 0, SEEK_SET)) != -1;
-
-    if (!ok)
-        this->fileSize = -1;
+    try
+    {
+        seek(0, Origin::End);
+        fileSize = tell();
+        seek(0, Origin::Start);
+    }
+    catch (...)
+    {
+        fileSize = -1;
+    }
 }
 
 File::~File()
 {
-    fclose(this->fileHandle);
+    fclose(fileHandle);
 }
 
-File &File::seek(
-    const OffsetType &offset,
-    SeekOrigin origin)
+File &File::seek(OffsetType offset, Origin origin)
 {
+    if (getSize() == -1)
+        throw std::runtime_error("Stream is unseekable");
+
+    int type;
+
     OffsetType destination = 0;
     switch (origin)
     {
-        case FSEEK_AHEAD:
-            destination = this->tell() + offset;
-            break;
-        case FSEEK_BEHIND:
-            destination = this->tell() - offset;
-            break;
-        case FSEEK_BEGINNING:
+        case Origin::Ahead:
             destination = offset;
+            type = SEEK_CUR;
             break;
-        case FSEEK_END:
-            destination = this->getFileSize() - offset;
+
+        case Origin::Behind:
+            destination = - offset;
+            type = SEEK_CUR;
             break;
+
+        case Origin::Start:
+            destination = offset;
+            type = SEEK_SET;
+            break;
+
+        case Origin::End:
+            destination = offset;
+            type = SEEK_END;
+            break;
+
         default:
             throw std::invalid_argument("Bad offset type");
     }
 
-    if (this->getFileSize() == -1)
-        throw std::runtime_error("Stream is unseekable");
-
-    if (destination < 0 || destination > this->getFileSize())
-        throw std::invalid_argument("File position out of range");
-
-    int result = fseeko64(this->fileHandle, offset, SEEK_SET);
+    int result = fseeko64(fileHandle, destination, type);
     if (result != 0)
         throw std::runtime_error("Failed to seek file");
 
@@ -87,42 +88,37 @@ File &File::seek(
 
 File::OffsetType File::tell() const
 {
-    off_t ret = ftello64(this->fileHandle);
+    off_t ret = ftello64(fileHandle);
     if (ret == -1L)
         throw std::runtime_error("Stream is unseekable");
-    return ((OffsetType) ret);
+    return ret;
 }
 
-File &File::read(unsigned char *buffer, const size_t &size)
+File &File::read(unsigned char *buffer, size_t size)
 {
-    if (((OffsetType) this->tell()) + ((OffsetType) size) > this->getFileSize())
+    OffsetType newPos = tell() + static_cast<OffsetType>(size);
+
+    if (newPos > getSize())
         throw std::runtime_error("Trying to read content beyond EOF");
 
-    if (fread(buffer, sizeof(unsigned char), size, this->fileHandle) != size)
-        throw std::runtime_error("Can't read bytes");
+    if (fread(buffer, sizeof(unsigned char), size, fileHandle) != size)
+        throw std::runtime_error("Can't read bytes at " + std::to_string(tell()));
 
     return *this;
 }
 
-File &File::write(unsigned char *buffer, const size_t &size)
+File &File::write(unsigned char *buffer, size_t size)
 {
-    if (fwrite(buffer, sizeof(unsigned char), size, this->fileHandle) != size)
+    if (fwrite(buffer, sizeof(unsigned char), size, fileHandle) != size)
         throw std::runtime_error("Can't write bytes");
 
-    if (this->fileSize != -1)
-    {
-        if (this->fileSize < this->tell())
-            this->fileSize = this->tell();
-    }
+    if (fileSize >= 0 && fileSize < tell())
+        fileSize = tell();
+
     return *this;
 }
 
-size_t File::getBufferSize() const
+File::OffsetType File::getSize() const
 {
-    return 8192;
-}
-
-File::OffsetType File::getFileSize() const
-{
-    return this->fileSize;
+    return fileSize;
 }

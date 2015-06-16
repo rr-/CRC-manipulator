@@ -2,93 +2,90 @@
 #define CRC_H
 
 #include <functional>
-#include "../File/File.h"
+#include "File/File.h"
 
-typedef uint32_t CRCType; //just make it enough to hold any derived CRC.
-//Templates would be real PITA since no abstract pointers would be possible.
+/**
+ * Just make it enough to hold any derived CRC.
+ * Templates would be real PITA since no abstract pointers would be possible.
+ */
+typedef uint32_t CRCType;
 
 class CRC
 {
     //Types, constants
     public:
-        enum CRCProgressType
+        enum class ProgressType : uint8_t
         {
-            CRCPROG_WRITE_START,
-            CRCPROG_WRITE_PROGRESS,
-            CRCPROG_WRITE_END,
-            CRCPROG_CHECKSUM_START,
-            CRCPROG_CHECKSUM_PROGRESS,
-            CRCPROG_CHECKSUM_END
+            WriteStart,
+            WriteProgress,
+            WriteEnd,
+            ChecksumStart,
+            ChecksumProgress,
+            ChecksumEnd
         };
-        const static int ERR_NOT_IMPLEMENTED = 0;
-        const static int ERR_PATCH_FAILED = 1;
 
         typedef std::function<void(
-            const CRCProgressType &progressType,
-            const File::OffsetType &startPosition,
-            const File::OffsetType &currentPosition,
-            const File::OffsetType &endPosition)>
+            ProgressType progressType,
+            File::OffsetType startPosition,
+            File::OffsetType currentPosition,
+            File::OffsetType endPosition)>
         ProgressFunction;
 
-
         virtual size_t getNumBytes() const = 0;
-        virtual CRCType getPolynomial() const = 0;
-        virtual CRCType getPolynomialReverse() const = 0;
 
         CRC();
         virtual ~CRC();
-        const CRCType &getInitialXOR() const;
-        const CRCType &getFinalXOR() const;
-        void setInitialXOR(const CRCType &t);
-        void setFinalXOR(const CRCType &t);
 
         void setProgressFunction(const ProgressFunction &progressFunction);
 
         CRCType computeChecksum(File &inputFile) const;
 
         void applyPatch(
-            const CRCType &desiredCRC,
-            const File::OffsetType &desiredPosition,
+            CRCType targetChecksum,
+            File::OffsetType targetPosition,
             File &inputFile,
             File &outputFile,
-            const bool &overwrite = false) const;
+            bool overwrite = false) const;
 
     protected:
+        CRCType getInitialXOR() const;
+        CRCType getFinalXOR() const;
+        void setInitialXOR(CRCType t);
+        void setFinalXOR(CRCType t);
+
+        virtual CRCType getPolynomial() const = 0;
+        virtual CRCType getPolynomialReverse() const = 0;
+
         void markProgress(
-            const CRCProgressType &progressType,
-            const File::OffsetType &startPosition,
-            const File::OffsetType &currentPosition,
-            const File::OffsetType &endPosition) const;
+            ProgressType progressType,
+            File::OffsetType startPosition,
+            File::OffsetType currentPosition,
+            File::OffsetType endPosition) const;
 
         CRCType computePartialChecksum(
             File &inputFile,
-            const File::OffsetType &startPosition,
-            const File::OffsetType &endPosition,
-            const CRCType &initialChecksum = 0) const;
+            File::OffsetType startPosition,
+            File::OffsetType endPosition,
+            CRCType initialChecksum = 0) const;
 
         CRCType computeReversePartialChecksum(
             File &inputFile,
-            const File::OffsetType &startPosition,
-            const File::OffsetType &endPosition,
-            const CRCType &initialChecksum = 0) const;
+            File::OffsetType startPosition,
+            File::OffsetType endPosition,
+            CRCType initialChecksum = 0) const;
 
         virtual CRCType computePatch(
-            const CRCType &desiredCRC,
-            const File::OffsetType &desiredPosition,
+            CRCType targetChecksum,
+            File::OffsetType targetPosition,
             File &inputFile,
-            const bool &overwrite = false) const = 0;
+            bool overwrite = false) const;
 
         /**
          * The following methods calculate new checksums based on
          * previous checksum value and current input byte.
          */
-        virtual CRCType makeNextChecksum(
-            const CRCType &checksum,
-            unsigned char c) const = 0;
-
-        virtual CRCType makePrevChecksum(
-            const CRCType &checksum,
-            unsigned char c) const = 0;
+        virtual CRCType makeNextChecksum(CRCType checksum, uint8_t c) const = 0;
+        virtual CRCType makePrevChecksum(CRCType checksum, uint8_t c) const = 0;
 
     private:
         CRCType finalXOR;
