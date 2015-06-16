@@ -24,6 +24,11 @@ private slots:
     void on_inputPathLineEdit_textChanged(const QString &);
     void on_outputPathLineEdit_textChanged(const QString &);
 
+    void progressChanged(double progress);
+    void workStarted();
+    void errorOccurred(const std::string &message);
+    void workFinished();
+
 private:
     std::unique_ptr<Ui::MainWindow> ui;
 };

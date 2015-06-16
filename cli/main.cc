@@ -184,7 +184,7 @@ void validateChecksum(CRC &activeCRC, const char *str, CRCType &checksum)
 int main(int argc, char **argv)
 {
     CRC *activeCRC = new CRC32();
-    activeCRC->setProgressFunction(&updateProgress);
+    activeCRC->setProgressFunction(updateProgress);
 
     for (int i = 1; i < argc; i ++)
     {
