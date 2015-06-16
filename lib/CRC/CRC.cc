@@ -1,3 +1,4 @@
+#include <cassert>
 #include "CRC.h"
 
 CRC::CRC()
@@ -29,13 +30,9 @@ void CRC::setFinalXOR(const CRCType &f)
     this->finalXOR = f;
 }
 
-void CRC::setProgressFunction(
-    void(*function)(const CRCProgressType &progressType,
-    const File::OffsetType &startPos,
-    const File::OffsetType &curPos,
-    const File::OffsetType &endPos))
+void CRC::setProgressFunction(const CRC::ProgressFunction &progressFunction)
 {
-    this->progressFunction = function;
+    this->progressFunction = progressFunction;
 }
 
 /**
@@ -218,9 +215,6 @@ void CRC::markProgress(
     const File::OffsetType &curPos,
     const File::OffsetType &endPos) const
 {
-    if (this->progressFunction == NULL)
-    {
-        return;
-    }
-    (*this->progressFunction)(progressType, startPos, curPos, endPos);
+    if (this->progressFunction != nullptr)
+        this->progressFunction(progressType, startPos, curPos, endPos);
 }

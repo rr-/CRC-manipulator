@@ -1,12 +1,7 @@
 #ifndef CRC_H
 #define CRC_H
 
-#include <stdint.h>
-#include <limits.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <assert.h>
+#include <functional>
 #include "../File/File.h"
 
 typedef uint32_t CRCType; //just make it enough to hold any derived CRC.
@@ -28,6 +23,14 @@ class CRC
         const static int ERR_NOT_IMPLEMENTED = 0;
         const static int ERR_PATCH_FAILED = 1;
 
+        typedef std::function<void(
+            const CRCProgressType &progressType,
+            const File::OffsetType &startPosition,
+            const File::OffsetType &currentPosition,
+            const File::OffsetType &endPosition)>
+        ProgressFunction;
+
+
         virtual size_t getNumBytes() const = 0;
         virtual CRCType getPolynomial() const = 0;
         virtual CRCType getPolynomialReverse() const = 0;
@@ -39,11 +42,7 @@ class CRC
         void setInitialXOR(const CRCType &t);
         void setFinalXOR(const CRCType &t);
 
-        void setProgressFunction(void(*function)(
-            const CRCProgressType &progressType,
-            const File::OffsetType &startPosition,
-            const File::OffsetType &currentPosition,
-            const File::OffsetType &endPosition));
+        void setProgressFunction(const ProgressFunction &progressFunction);
 
         CRCType computeChecksum(File &inputFile) const;
 
@@ -94,11 +93,7 @@ class CRC
     private:
         CRCType finalXOR;
         CRCType initialXOR;
-        void (*progressFunction)(
-            const CRCProgressType &progressType,
-            const File::OffsetType &startPosition,
-            const File::OffsetType &currentPosition,
-            const File::OffsetType &endPosition);
+        ProgressFunction progressFunction;
 };
 
 #endif
