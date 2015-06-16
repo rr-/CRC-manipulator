@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "File/File.h"
 
 std::unique_ptr<File> File::fromFileHandle(FILE *fileHandle)
