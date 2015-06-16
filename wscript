@@ -86,7 +86,8 @@ def build(ctx):
     ctx.objects(
         source   = lib_sources,
         target   = 'lib',
-        cxxflags = ['-iquote', lib_path])
+        cxxflags = ['-iquote', lib_path],
+        includes = ['.'])
 
     ctx.program(
         source   = cli_sources,
