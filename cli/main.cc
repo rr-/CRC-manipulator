@@ -1,10 +1,3 @@
-#if defined __linux__
-#elif defined _WIN32 || defined _WIN64 || defined __CYGWIN__
-    #include <Windows.h>
-#else
-    #error unknown platform
-#endif
-
 #include <iostream>
 #include <iomanip>
 #include <vector>
