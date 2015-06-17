@@ -30,3 +30,27 @@ Examples:
 ./crcmanip - output.txt 1234abcd <input.txt
 ./crcmanip - - 1234abcd <input.txt >output.txt
 </pre>
+
+### Compiling
+
+1. Get `g++` and `qt4` if you wish to compile GUI version.
+2. Run following commands:
+
+        ./bootstrap
+        ./waf configure
+        ./waf build
+
+### Cross compiling for Windows
+
+1. Get `mingw-w64` and `qt4` if you wish to compile GUI version.
+   For Arch: `mingw-w64-gcc` from main repositories and `mingw-w64-qt4` +
+   dependencies from AUR. I had no luck with linking to `mxe`'s version.
+2. Run following:
+
+        CROSS_COMPILE=i686-w64-mingw32-
+        export CC=${CROSS_COMPILE}gcc
+        export CXX=${CROSS_COMPILE}g++
+        export AR=${CROSS_COMPILE}ar
+        export PKGCONFIG=${CROSS_COMPILE}pkg-config
+
+        ./waf configure && ./waf build
