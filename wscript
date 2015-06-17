@@ -67,16 +67,14 @@ def build(ctx):
 
     ctx.objects(
         source = lib_sources,
-        target = 'lib',
+        target = 'common',
         cxxflags = ['-iquote', lib_path])
 
     ctx.program(
         source = cli_sources,
         target = 'crcmanip-cli',
         cxxflags = ['-iquote', cli_path, '-iquote', lib_path],
-        use = [
-            'lib',
-        ])
+        use = [ 'common' ])
 
     ctx.program(
         source   = gui_sources,
@@ -85,7 +83,7 @@ def build(ctx):
         cxxflags = ['-iquote', gui_path, '-iquote', lib_path],
         includes = [ '.' ],
         defines  = [ 'WAF' ],
-        use      = [ 'QTCORE', 'QTGUI', 'lib', ])
+        use      = [ 'QTCORE', 'QTGUI', 'common' ])
 
 def dist(ctx):
     ctx.algo = 'zip'
