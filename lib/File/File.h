@@ -3,18 +3,16 @@
 
 #include <string>
 #include <memory>
-
-#if defined __CYGWIN__
-    #define _FILE_OFFSET_BITS 64
-    #define fseeko64(a,b,c) fseeko(a,b,c)
-    #define ftello64(a) ftello(a)
-    #define off64_t off_t
-#endif
+#include "config.h"
 
 class File
 {
     public:
-        typedef off64_t OffsetType;
+        #if HAVE_OFF64T
+            typedef off64_t OffsetType;
+        #else
+            typedef off_t OffsetType;
+        #endif
 
         enum class Origin : uint8_t
         {
