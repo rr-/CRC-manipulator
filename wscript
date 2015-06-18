@@ -23,6 +23,13 @@ def options(ctx):
         action = 'store_true',
         help = 'enable static linking')
 
+def configure_version(ctx):
+    try:
+        version = os.popen('git describe --always --dirty --long --tags').read().strip()
+    except:
+        version = '?'
+    ctx.env.DEFINES = [ 'CRCMANIP_VERSION="' + version + '"' ]
+
 def configure_flags(ctx):
     ctx.env.CXXFLAGS = [
         '-Wall',
@@ -65,6 +72,7 @@ def configure_features(ctx):
 
 def configure(ctx):
     ctx.load(['compiler_cxx'])
+    configure_version(ctx)
     configure_flags(ctx)
     configure_features(ctx)
     ctx.load(['qt4'])

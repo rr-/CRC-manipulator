@@ -11,7 +11,6 @@
 #include "CRC/CRC16IBM.h"
 #include "CRC/CRC32.h"
 #include "File/File.h"
-#include "version.h"
 
 namespace
 {
@@ -74,7 +73,7 @@ namespace
 
     void printUsage(std::ostream &s)
     {
-        s << "CRC checksum manipulator " << VERSION << "\n";
+        s << "CRC checksum manipulator " << CRCMANIP_VERSION << "\n";
         s << R"(
 Freely reverse and change CRC32 checksums through smart file patching.
 Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]

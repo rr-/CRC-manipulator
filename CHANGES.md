@@ -8,6 +8,7 @@
     - improved type system
   - Removed debug macros
 - Switched to semantic versioning
+- Changed version maintenance to be based on git tags
 
 ### 0.2.6
 - Fixed -p argument
