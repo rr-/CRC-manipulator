@@ -1,40 +1,29 @@
 CRC-manipulator
 ===============
 
-<pre>
-crcmanip - CRC checksum manipulator
-Freely manipulate CRC32 checksums through smart file patching.
-Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]
+A tool that lets you reverse and freely change CRC32 checksums through smart
+file patching.
 
-INFILE               input file. if -, standard input will be used.
-OUTFILE              output file. if -, standard output will be used.
-CHECKSUM             desired checksum.
+### How it works
 
-OPTIONS can be:
--h, --help           print this information.
--p, --position=NUM   position where to append the patch. Unless specified,
-                     patch will be placed at the end of the input file.
-                     If position is negative, patch will be placed at the
-                     n-th byte from the end of file.
-    --insert         specifies that patch should be inserted (default)
-    --overwrite      specifies that patch should overwrite existing bytes
+It appends a few bytes at the end of the file so that the file checksum
+computes to given hexadecimal hash.
 
-CHECKSUM must be a hexadecimal value.
-INFILE must be seekable stream. In other words, it cannot be a pipe
-(particularly standard input), fifo etc.
+### Features
 
-Examples:
-./crcmanip input.txt output.txt 1234abcd
-./crcmanip input.txt output.txt 1234abcd -p -1
-./crcmanip input.txt - 1234abcd >output.txt
-./crcmanip - output.txt 1234abcd <input.txt
-./crcmanip - - 1234abcd <input.txt >output.txt
-</pre>
+- CRC32, but might add support for other CRC checksums in the future.
+- Available for GNU/Linux and Windows.
+- Simple GUI (for more advanced options, use CLI version).
+
+### Binaries for Windows
+
+To download precompiled binaries for Windows, head over to
+[releases](https://github.com/rr-/CRC-manipulator/releases).
 
 ### Compiling
 
-1. Get `g++` and `qt4` if you wish to compile GUI version.
-2. Run following commands:
+1. Make sure you have `g++` and if you wish to compile GUI frontend - `qt4`.
+2. Run following:
 
         ./bootstrap
         ./waf configure
@@ -42,10 +31,14 @@ Examples:
 
 ### Cross compiling for Windows
 
-1. Get `mingw-w64` and `qt4` if you wish to compile GUI version.
-   For Arch: `mingw-w64-gcc` from main repositories and `mingw-w64-qt4` +
-   dependencies from AUR. I had no luck with linking to `mxe`'s version.
+1. Make sure you have `mingw-w64` and if you with to compile GUI frontend -
+   `qt4` (compiled with MinGW-w64).  
+   **Arch Linux**: to get these, you can install `mingw-w64-gcc` from main
+   repositories and `mingw-w64-qt4` + dependencies from AUR.
+   **mxe**: I had no luck with linking to `mxe`'s qt version.
 2. Run following:
+
+        ./bootstrap
 
         CROSS_COMPILE=i686-w64-mingw32-
         export CC=${CROSS_COMPILE}gcc
@@ -53,4 +46,5 @@ Examples:
         export AR=${CROSS_COMPILE}ar
         export PKGCONFIG=${CROSS_COMPILE}pkg-config
 
-        ./waf configure && ./waf build
+        ./waf configure
+        ./waf build

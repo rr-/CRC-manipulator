@@ -76,7 +76,7 @@ namespace
     {
         s << "CRC checksum manipulator " << VERSION << "\n";
         s << R"(
-Freely manipulate CRC32 checksums through smart file patching.
+Freely reverse and change CRC32 checksums through smart file patching.
 Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]
 
 INFILE               input file. if -, standard input will be used.
