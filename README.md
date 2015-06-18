@@ -32,10 +32,10 @@ To download precompiled binaries for Windows, head over to
 ### Cross compiling for Windows
 
 1. Make sure you have `mingw-w64` and if you with to compile GUI frontend -
-   `qt4` (compiled with MinGW-w64).  
-   **Arch Linux**: to get these, you can install `mingw-w64-gcc` from main
+   `qt4` (compiled with MinGW-w64).
+   * **Arch Linux**: to get these, you can install `mingw-w64-gcc` from main
    repositories and `mingw-w64-qt4` + dependencies from AUR.
-   **mxe**: I had no luck with linking to `mxe`'s qt version.
+   * **mxe**: unfortunately, I had no luck with linking to `mxe`'s qt version.
 2. Run following:
 
         ./bootstrap
