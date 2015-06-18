@@ -198,19 +198,19 @@ CRCType CRC::computePatch(
     File &inputFile,
     bool overwrite) const
 {
-    uint32_t checksum1 = computePartialChecksum(
+    CRCType checksum1 = computePartialChecksum(
         inputFile,
         0,
         targetPos,
         getInitialXOR());
 
-    uint32_t checksum2 = computeReversePartialChecksum(
+    CRCType checksum2 = computeReversePartialChecksum(
         inputFile,
         inputFile.getSize(),
         targetPos + (overwrite ? getNumBytes() : 0),
-        static_cast<uint32_t>(targetChecksum ^ getFinalXOR()));
+        static_cast<CRCType>(targetChecksum ^ getFinalXOR()));
 
-    uint32_t patch = checksum2;
+    CRCType patch = checksum2;
     for (size_t i = 0, j = getNumBytes() - 1; i < getNumBytes(); i++, j--)
         patch = makePrevChecksum(patch, (checksum1 >> (j << 3)) & 0xff);
 
