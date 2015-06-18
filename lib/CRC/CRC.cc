@@ -207,7 +207,7 @@ CRCType CRC::computePatch(
     uint32_t checksum2 = computeReversePartialChecksum(
         inputFile,
         inputFile.getSize(),
-        targetPos + (overwrite ? 4 : 0),
+        targetPos + (overwrite ? getNumBytes() : 0),
         static_cast<uint32_t>(targetChecksum ^ getFinalXOR()));
 
     uint32_t patch = checksum2;
