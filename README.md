@@ -40,7 +40,7 @@ To download precompiled binaries for Windows, head over to
 
         ./bootstrap
 
-        CROSS_COMPILE=i686-w64-mingw32-
+        export CROSS_COMPILE=i686-w64-mingw32-
         export CC=${CROSS_COMPILE}gcc
         export CXX=${CROSS_COMPILE}g++
         export AR=${CROSS_COMPILE}ar

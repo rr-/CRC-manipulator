@@ -120,5 +120,20 @@ def build(ctx):
             use       = [ 'QTCORE', 'QTGUI', 'common' ])
 
 def dist(ctx):
-    ctx.algo = 'zip'
-    ctx.files = ctx.path.ant_glob('build')
+    ctx.algo  = 'zip'
+    ctx.base_path = ctx.path
+    ctx.excl = ctx.get_excl() + ' *.dll'
+
+def distbin(ctx):
+    from subprocess import call, PIPE
+    for p in ctx.path.ant_glob('**/*.exe'):
+        call([getattr(os.environ, 'CROSS_COMPILE', '') + 'strip', p.abspath()], stdout=PIPE, stderr=PIPE)
+        call(['upx', '-q', '--ultra-brute', p.abspath()], stdout=PIPE, stderr=PIPE)
+
+    from zipfile import ZipFile, ZIP_DEFLATED
+    arch_name = 'crcmanip-' + VERSION + '-bin.zip'
+
+    zip = ZipFile(arch_name, 'w', compression=ZIP_DEFLATED)
+    for p in ctx.path.ant_glob('build/crcmanip*') + ctx.path.ant_glob('**/*.dll'):
+        zip.write(p.abspath(), p.name, ZIP_DEFLATED)
+    zip.close()
