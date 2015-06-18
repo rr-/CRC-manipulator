@@ -1,4 +1,4 @@
-### Current
+### 0.3
 - Switched to waf build system (replaces shell scripts)
 - Switched to Qt
 - Improved overall code quality
