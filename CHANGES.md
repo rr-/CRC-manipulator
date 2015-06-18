@@ -1,3 +1,13 @@
+### Current
+- Switched to waf build system (replaces shell scripts)
+- Switched to Qt
+- Improved overall code quality
+  - Incorporated C++11 features:
+    - smart pointers
+    - throwing integers replaced with proper exceptions
+    - improved type system
+  - Removed debug macros
+
 ### 0.26
 - Fixed -p argument
 - Fixed --overwrite argument
