@@ -15,11 +15,6 @@
 
 namespace
 {
-    std::string getVersion()
-    {
-        return std::to_string(MAJOR_VERSION) + "." + std::to_string(MINOR_VERSION);
-    }
-
     void updateProgress(
         CRC::ProgressType progressType,
         File::OffsetType startPos,
@@ -79,7 +74,7 @@ namespace
 
     void printUsage(std::ostream &s)
     {
-        s << "CRC checksum manipulator " << getVersion () << "\n";
+        s << "CRC checksum manipulator " << VERSION << "\n";
         s << R"(
 Freely manipulate CRC32 checksums through smart file patching.
 Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]

@@ -7,8 +7,9 @@
     - throwing integers replaced with proper exceptions
     - improved type system
   - Removed debug macros
+- Switched to semantic versioning
 
-### 0.26
+### 0.2.6
 - Fixed -p argument
 - Fixed --overwrite argument
 - Removed pipe support (its performance was deplorable, anyway)
@@ -16,20 +17,20 @@
 - Replaced makefile with a shell script that compiles fine under GNU/Linux,
   Cygwin and MinGW
 
-### 0.25
+### 0.2.5
 - Support for files larger than 4GB
 
-### 0.24
+### 0.2.4
 - Simplified CLI parameters
   - Removed CLI parameter support for types other than CRC32
   - Removed --compute option
 - Fixed bug in --position
 - Added sanity check: input path == output path
 
-### 0.23
+### 0.2.3
 - Added warning when not specifying all CRC digits
 
-### 0.22
+### 0.2.2
 - Fully reversed CRC16
   - Removed brute force routines
 - Improved code quality
@@ -38,7 +39,7 @@
     - moved `FileAdapter` `IFile`
 - Removed warning when printing to stdout without proper redirection
 
-### 0.21
+### 0.2.1
 - Optimized I/O wrappers (buffer size increased from 1B to 8K)
 - Added simple progressbar
 - Added support for negative --position
