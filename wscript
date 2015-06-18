@@ -3,7 +3,12 @@ from waflib import Logs
 import os
 
 APPNAME = 'crcmanip'
-VERSION = '0.26'
+try:
+    VERSION = os.popen('git describe --tags').read().strip()
+    VERSION_LONG = os.popen('git describe --always --dirty --long --tags').read().strip()
+except:
+    VERSION = '0.0'
+    VERSION_LONG = '?'
 
 def options(ctx):
     ctx.load(['compiler_cxx', 'qt4'])
@@ -24,11 +29,7 @@ def options(ctx):
         help = 'enable static linking')
 
 def configure_version(ctx):
-    try:
-        version = os.popen('git describe --always --dirty --long --tags').read().strip()
-    except:
-        version = '?'
-    ctx.env.DEFINES = [ 'CRCMANIP_VERSION="' + version + '"' ]
+    ctx.env.DEFINES = [ 'CRCMANIP_VERSION="' + VERSION_LONG + '"' ]
 
 def configure_flags(ctx):
     ctx.env.CXXFLAGS = [
