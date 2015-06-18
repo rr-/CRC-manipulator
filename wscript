@@ -97,13 +97,14 @@ def build(ctx):
         use      = [ 'common' ])
 
     ctx.program(
-        source   = gui_sources,
-        target   = 'crcmanip-gui',
-        includes = [ '.' ],
-        cxxflags = ['-iquote', gui_path, '-iquote', lib_path],
-        defines  = [ 'WAF' ],
-        features = [ 'qt4' ],
-        use      = [ 'QTCORE', 'QTGUI', 'common' ])
+        source    = gui_sources,
+        target    = 'crcmanip-gui',
+        includes  = [ '.' ],
+        cxxflags  = ['-iquote', gui_path, '-iquote', lib_path],
+        linkflags = [ '-Wl,-subsystem,windows' if ctx.env.DEST_OS == 'win32' else '' ],
+        defines   = [ 'WAF' ],
+        features  = [ 'qt4' ],
+        use       = [ 'QTCORE', 'QTGUI', 'common' ])
 
 def dist(ctx):
     ctx.algo = 'zip'
