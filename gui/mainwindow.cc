@@ -200,6 +200,10 @@ void MainWindow::on_patchPushButton_clicked()
         patcher, SIGNAL(finished()),
         this, SLOT(workFinished()));
 
+    connect(
+        patcher, SIGNAL(finished()),
+        this, SLOT(workFinished()));
+
     patcher->start();
 }
 
