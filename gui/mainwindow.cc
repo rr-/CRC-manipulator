@@ -102,6 +102,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    setWindowTitle(windowTitle() + " v" + CRCMANIP_VERSION);
     changeStatus(*ui, "Ready");
 }
 

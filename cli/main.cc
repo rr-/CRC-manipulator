@@ -73,7 +73,7 @@ namespace
 
     void printUsage(std::ostream &s)
     {
-        s << "CRC checksum manipulator " << CRCMANIP_VERSION << "\n";
+        s << "CRC manipulator v" << CRCMANIP_VERSION << "\n";
         s << R"(
 Freely reverse and change CRC32 checksums through smart file patching.
 Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]
