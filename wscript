@@ -86,14 +86,17 @@ def build(ctx):
     lib_dir = 'lib'
     cli_dir = 'cli'
     gui_dir = 'gui'
+    tests_dir = 'tests'
     lib_path = ctx.path.find_node(lib_dir).abspath()
     cli_path = ctx.path.find_node(cli_dir).abspath()
     gui_path = ctx.path.find_node(gui_dir).abspath()
+    tests_path = ctx.path.find_node(tests_dir).abspath()
 
     lib_sources = ctx.path.ant_glob(lib_dir + '/**/*.cc')
     cli_sources = ctx.path.ant_glob(cli_dir + '/**/*.cc')
     gui_sources = ctx.path.ant_glob(gui_dir + '/**/*.cc') \
                 + ctx.path.ant_glob(gui_dir + '/**/*.ui')
+    tests_sources = ctx.path.ant_glob(tests_dir + '/**/*.cc')
 
     ctx.objects(
         source   = lib_sources,
@@ -106,6 +109,13 @@ def build(ctx):
         target   = 'crcmanip-cli',
         includes = ['.'],
         cxxflags = ['-iquote', cli_path, '-iquote', lib_path],
+        use      = [ 'common' ])
+
+    ctx.program(
+        source   = tests_sources,
+        target   = 'crcmanip-tests',
+        includes = ['.'],
+        cxxflags = ['-iquote', tests_path, '-iquote', lib_path],
         use      = [ 'common' ])
 
     if getattr(ctx.env, 'HAVE_QTCORE', False):
