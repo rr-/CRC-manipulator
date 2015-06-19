@@ -34,8 +34,10 @@ class File
         OffsetType getSize() const;
         OffsetType tell() const;
         File &seek(OffsetType offset, Origin origin);
+        File &read(char *buffer, size_t size);
         File &read(unsigned char *buffer, size_t size);
-        File &write(unsigned char *buffer, size_t size);
+        File &write(const char *buffer, size_t size);
+        File &write(const unsigned char *buffer, size_t size);
 
         static std::unique_ptr<File> fromFileHandle(FILE *fileHandle);
         static std::unique_ptr<File> fromFileName(

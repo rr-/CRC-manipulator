@@ -12,7 +12,7 @@ std::unique_ptr<File> File::fromFileName(
     std::string modeString;
 
     if ((mode & Mode::Write) && (mode & Mode::Read))
-        modeString += "r+";
+        modeString += "a+";
     else if (mode & Mode::Write)
         modeString += "w";
     else if (mode & Mode::Read)
@@ -111,6 +111,11 @@ File::OffsetType File::tell() const
     return ret;
 }
 
+File &File::read(char *buffer, size_t size)
+{
+    return read(reinterpret_cast<unsigned char*>(buffer), size);
+}
+
 File &File::read(unsigned char *buffer, size_t size)
 {
     OffsetType newPos = tell() + static_cast<OffsetType>(size);
@@ -124,7 +129,12 @@ File &File::read(unsigned char *buffer, size_t size)
     return *this;
 }
 
-File &File::write(unsigned char *buffer, size_t size)
+File &File::write(const char *buffer, size_t size)
+{
+    return write(reinterpret_cast<const unsigned char*>(buffer), size);
+}
+
+File &File::write(const unsigned char *buffer, size_t size)
 {
     if (fwrite(buffer, sizeof(unsigned char), size, fileHandle) != size)
         throw std::runtime_error("Can't write bytes");
