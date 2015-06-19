@@ -1,3 +1,14 @@
+### 0.3.3
+- Added unit tests using Catch framework
+
+### 0.3.2
+- Fixed broken CRC16CCITT support (even though it's currently unused)
+  - Fixed patch computing
+  - Changed the algorithm - turns out the parameters were wrong since day zero
+
+### 0.3.1
+- Fixed build problems
+
 ### 0.3
 - Switched to waf build system (replaces shell scripts)
 - Switched to Qt
