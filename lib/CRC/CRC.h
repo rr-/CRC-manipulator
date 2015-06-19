@@ -31,6 +31,19 @@ class CRC
             File::OffsetType endPosition)>
         ProgressFunction;
 
+    private:
+        size_t numBytes;
+        CRCType polynomial;
+        CRCType polynomialReverse;
+        CRCType initialXOR;
+        CRCType finalXOR;
+
+        CRCType lookupTable[256];
+        CRCType invLookupTable[256];
+
+        ProgressFunction progressFunction;
+
+    public:
         CRC();
         virtual ~CRC();
 
@@ -52,12 +65,8 @@ class CRC
             CRCType polynomial,
             CRCType initialXOR,
             CRCType finalXOR);
-        size_t numBytes;
-        CRCType polynomial;
-        CRCType polynomialReverse;
-        CRCType initialXOR;
-        CRCType finalXOR;
 
+    private:
         void markProgress(
             ProgressType progressType,
             File::OffsetType startPosition,
@@ -86,15 +95,8 @@ class CRC
          * The following methods calculate new checksums based on
          * previous checksum value and current input byte.
          */
-        virtual CRCType makeNextChecksum(CRCType checksum, uint8_t c) const = 0;
-        virtual CRCType makePrevChecksum(CRCType checksum, uint8_t c) const = 0;
-
-    protected:
-        CRCType lookupTable[256];
-        CRCType invLookupTable[256];
-
-    private:
-        ProgressFunction progressFunction;
+        CRCType makeNextChecksum(CRCType checksum, uint8_t c) const;
+        CRCType makePrevChecksum(CRCType checksum, uint8_t c) const;
 };
 
 #endif

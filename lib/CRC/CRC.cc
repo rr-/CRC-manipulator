@@ -1,6 +1,10 @@
 #include <cassert>
 #include "CRC/CRC.h"
 
+/**
+ * NOTICE: following code is strongly based on SAR-PR-2006-05
+ */
+
 namespace
 {
     const size_t BufferSize = 8192;
@@ -240,4 +244,16 @@ CRCType CRC::computePatch(
         patch = makePrevChecksum(patch, (checksum1 >> (j << 3)) & 0xff);
 
     return patch;
+}
+
+CRCType CRC::makeNextChecksum(CRCType prevChecksum, uint8_t c) const
+{
+    uint8_t index = prevChecksum ^ c;
+    return (prevChecksum >> 8) ^ lookupTable[index];
+}
+
+CRCType CRC::makePrevChecksum(CRCType nextChecksum, uint8_t c) const
+{
+    uint8_t index = nextChecksum >> (numBytes * 8 - 8);
+    return (nextChecksum << 8) ^ invLookupTable[index] ^ c;
 }
