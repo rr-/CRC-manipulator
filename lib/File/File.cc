@@ -12,7 +12,7 @@ std::unique_ptr<File> File::fromFileName(
     std::string modeString;
 
     if ((mode & Mode::Write) && (mode & Mode::Read))
-        modeString += "r+";
+        modeString += "a+";
     else if (mode & Mode::Write)
         modeString += "w";
     else if (mode & Mode::Read)

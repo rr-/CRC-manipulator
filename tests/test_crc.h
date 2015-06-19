@@ -4,5 +4,6 @@
 #include "CRC/CRC.h"
 
 void test_appending(std::unique_ptr<CRC> crc, CRCType checksum);
+void test_computing(std::unique_ptr<CRC> crc, CRCType checksum);
 
 #endif
