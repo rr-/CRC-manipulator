@@ -9,11 +9,6 @@ CRCType CRC32::getPolynomial() const
     return 0x04C11DB7;
 }
 
-CRCType CRC32::getPolynomialReverse() const
-{
-    return 0xEDB88320;
-}
-
 size_t CRC32::getNumBytes() const
 {
     return 4;

@@ -5,11 +5,6 @@ CRCType CRC16CCITT::getPolynomial() const
     return (1 << 0 | 1 << 5 | 1 << 12);
 }
 
-CRCType CRC16CCITT::getPolynomialReverse() const
-{
-    return (1 << (15-0) | 1 << (15-5) | 1 << (15-12));
-}
-
 size_t CRC16CCITT::getNumBytes() const
 {
     return 2;

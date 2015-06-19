@@ -22,6 +22,15 @@ CRC::~CRC()
 {
 }
 
+CRCType CRC::getPolynomialReverse() const
+{
+    CRCType rev = 0;
+    size_t numBits = getNumBytes() * 8;
+    for (size_t i = 0; i < numBits; i++)
+        rev |= !!(getPolynomial() & (1 << i)) << (numBits - 1 - i);
+    return rev;
+}
+
 CRCType CRC::getInitialXOR() const
 {
     return initialXOR;

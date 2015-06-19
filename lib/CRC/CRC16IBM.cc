@@ -5,11 +5,6 @@ CRCType CRC16IBM::getPolynomial() const
     return (1 << 0 | 1 << 2 | 1 << 15);
 }
 
-CRCType CRC16IBM::getPolynomialReverse() const
-{
-    return (1 << (15-0) | 1 << (15-2) | 1 << (15-15));
-}
-
 size_t CRC16IBM::getNumBytes() const
 {
     return 2;

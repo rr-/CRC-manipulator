@@ -54,7 +54,7 @@ class CRC
         void setFinalXOR(CRCType t);
 
         virtual CRCType getPolynomial() const = 0;
-        virtual CRCType getPolynomialReverse() const = 0;
+        CRCType getPolynomialReverse() const;
 
         void markProgress(
             ProgressType progressType,
