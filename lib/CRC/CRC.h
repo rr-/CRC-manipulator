@@ -89,6 +89,10 @@ class CRC
         virtual CRCType makeNextChecksum(CRCType checksum, uint8_t c) const = 0;
         virtual CRCType makePrevChecksum(CRCType checksum, uint8_t c) const = 0;
 
+    protected:
+        CRCType lookupTable[256];
+        CRCType invLookupTable[256];
+
     private:
         ProgressFunction progressFunction;
 };

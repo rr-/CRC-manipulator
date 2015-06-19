@@ -34,6 +34,28 @@ CRC::CRC(size_t numBytes, CRCType polynomial, CRCType initialXOR, CRCType finalX
     initialXOR(initialXOR),
     finalXOR(finalXOR)
 {
+    size_t numBits = numBytes * 8;
+    auto var1 = numBits - 8;
+    auto var2 = 1 << (numBits - 1);
+    for (uint16_t n = 0; n <= 0xff; n++)
+    {
+        CRCType crc1 = n;
+        CRCType crc2 = n << var1;
+        for (uint8_t k = 0; k < 8; k++)
+        {
+            if (crc1 & 1)
+                crc1 = (crc1 >> 1) ^ polynomialReverse;
+            else
+                crc1 >>= 1;
+
+            if (crc2 & var2)
+                crc2 = ((crc2 ^ polynomialReverse) << 1) | 1;
+            else
+                crc2 <<= 1;
+        }
+        lookupTable[n] = crc1;
+        invLookupTable[n] = crc2;
+    }
 }
 
 CRC::~CRC()
