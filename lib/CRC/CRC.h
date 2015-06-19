@@ -48,10 +48,9 @@ class CRC
             bool overwrite = false) const;
 
     protected:
-        CRCType getInitialXOR() const;
-        CRCType getFinalXOR() const;
-        void setInitialXOR(CRCType t);
-        void setFinalXOR(CRCType t);
+        CRC(CRCType initialXOR, CRCType finalXOR);
+        CRCType initialXOR;
+        CRCType finalXOR;
 
         virtual CRCType getPolynomial() const = 0;
         CRCType getPolynomialReverse() const;
@@ -88,8 +87,6 @@ class CRC
         virtual CRCType makePrevChecksum(CRCType checksum, uint8_t c) const = 0;
 
     private:
-        CRCType finalXOR;
-        CRCType initialXOR;
         ProgressFunction progressFunction;
 };
 

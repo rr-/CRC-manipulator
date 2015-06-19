@@ -22,10 +22,8 @@ CRCType CRC16IBM::makePrevChecksum(CRCType nextChecksum, uint8_t c) const
     return static_cast<uint16_t>((nextChecksum << 8) ^ invLookupTable[tmp] ^ c);
 }
 
-CRC16IBM::CRC16IBM() : CRC()
+CRC16IBM::CRC16IBM() : CRC(0, 0)
 {
-    setInitialXOR(0);
-    setFinalXOR(0);
     for (uint16_t n = 0; n <= 0xff; n++)
     {
         uint16_t crc1 = 0;

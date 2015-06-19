@@ -26,10 +26,8 @@ CRCType CRC32::makePrevChecksum(CRCType nextChecksum, uint8_t c) const
     return static_cast<uint32_t>((nextChecksum << 8) ^ invLookupTable[tmp] ^ c);
 }
 
-CRC32::CRC32() : CRC()
+CRC32::CRC32() : CRC(0xffffffff, 0xffffffff)
 {
-    setInitialXOR(0xffffffff);
-    setFinalXOR(0xffffffff);
     for (unsigned short n = 0; n <= 0xff; n++)
     {
         uint32_t crc1 = n;

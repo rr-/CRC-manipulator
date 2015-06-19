@@ -18,6 +18,12 @@ CRC::CRC()
     progressFunction = nullptr;
 }
 
+CRC::CRC(CRCType initialXOR, CRCType finalXOR) :
+    initialXOR(initialXOR),
+    finalXOR(finalXOR)
+{
+}
+
 CRC::~CRC()
 {
 }
@@ -29,26 +35,6 @@ CRCType CRC::getPolynomialReverse() const
     for (size_t i = 0; i < numBits; i++)
         rev |= !!(getPolynomial() & (1 << i)) << (numBits - 1 - i);
     return rev;
-}
-
-CRCType CRC::getInitialXOR() const
-{
-    return initialXOR;
-}
-
-CRCType CRC::getFinalXOR() const
-{
-    return finalXOR;
-}
-
-void CRC::setInitialXOR(CRCType f)
-{
-    initialXOR = f;
-}
-
-void CRC::setFinalXOR(CRCType f)
-{
-    finalXOR = f;
 }
 
 void CRC::setProgressFunction(const CRC::ProgressFunction &f)
@@ -114,9 +100,9 @@ void CRC::applyPatch(
  */
 CRCType CRC::computeChecksum(File &input) const
 {
-    CRCType checksum = getInitialXOR();
+    CRCType checksum = initialXOR;
     checksum = computePartialChecksum(input, 0, input.getSize(), checksum);
-    return checksum ^ getFinalXOR();
+    return checksum ^ finalXOR;
 }
 
 /**
@@ -211,13 +197,13 @@ CRCType CRC::computePatch(
         inputFile,
         0,
         targetPos,
-        getInitialXOR());
+        initialXOR);
 
     CRCType checksum2 = computeReversePartialChecksum(
         inputFile,
         inputFile.getSize(),
         targetPos + (overwrite ? getNumBytes() : 0),
-        static_cast<CRCType>(targetChecksum ^ getFinalXOR()));
+        static_cast<CRCType>(targetChecksum ^ finalXOR));
 
     CRCType patch = checksum2;
     for (size_t i = 0, j = getNumBytes() - 1; i < getNumBytes(); i++, j--)
