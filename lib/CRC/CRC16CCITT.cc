@@ -62,8 +62,21 @@ CRCType CRC16CCITT::computePatch(
     File &inputFile,
     bool overwrite) const
 {
-    auto patch = CRC::computePatch(
-        targetChecksum, targetPos, inputFile, overwrite);
+    CRCType checksum1 = computePartialChecksum(
+        inputFile,
+        0,
+        targetPos,
+        getInitialXOR());
+
+    CRCType checksum2 = computeReversePartialChecksum(
+        inputFile,
+        inputFile.getSize(),
+        targetPos + (overwrite ? getNumBytes() : 0),
+        static_cast<CRCType>(targetChecksum ^ getFinalXOR()));
+
+    CRCType patch = checksum2;
+    for (size_t i = 0, j = getNumBytes() - 1; i < getNumBytes(); i++, j--)
+        patch = makePrevChecksum(patch, (checksum1 >> (i << 3)) & 0xff);
 
     return (patch << 8 | patch >> 8) & 0xffff;
 }
