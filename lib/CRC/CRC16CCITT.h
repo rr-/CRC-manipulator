@@ -9,8 +9,6 @@ class CRC16CCITT : public CRC
         CRC16CCITT();
 
     protected:
-        virtual CRCType getPolynomial() const;
-        virtual size_t getNumBytes() const;
         virtual CRCType makeNextChecksum(CRCType prevChecksum, uint8_t c) const;
         virtual CRCType makePrevChecksum(CRCType nextChecksum, uint8_t c) const;
 

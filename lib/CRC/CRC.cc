@@ -11,6 +11,15 @@ namespace
             return maxPos - currentPos;
         return BufferSize;
     }
+
+    CRCType getPolynomialReverse(CRCType polynomial, size_t numBytes)
+    {
+        CRCType rev = 0;
+        size_t numBits = numBytes * 8;
+        for (size_t i = 0; i < numBits; i++)
+            rev |= !!(polynomial & (1 << i)) << (numBits - 1 - i);
+        return rev;
+    }
 }
 
 CRC::CRC()
@@ -18,7 +27,10 @@ CRC::CRC()
     progressFunction = nullptr;
 }
 
-CRC::CRC(CRCType initialXOR, CRCType finalXOR) :
+CRC::CRC(size_t numBytes, CRCType polynomial, CRCType initialXOR, CRCType finalXOR) :
+    numBytes(numBytes),
+    polynomial(polynomial),
+    polynomialReverse(getPolynomialReverse(polynomial, numBytes)),
     initialXOR(initialXOR),
     finalXOR(finalXOR)
 {
@@ -28,13 +40,9 @@ CRC::~CRC()
 {
 }
 
-CRCType CRC::getPolynomialReverse() const
+size_t CRC::getNumBytes() const
 {
-    CRCType rev = 0;
-    size_t numBits = getNumBytes() * 8;
-    for (size_t i = 0; i < numBits; i++)
-        rev |= !!(getPolynomial() & (1 << i)) << (numBits - 1 - i);
-    return rev;
+    return numBytes;
 }
 
 void CRC::setProgressFunction(const CRC::ProgressFunction &f)
@@ -71,13 +79,13 @@ void CRC::applyPatch(
     }
 
     //output patch
-    assert(getNumBytes() < BufferSize);
-    for (size_t i = 0; i < getNumBytes(); i++)
+    assert(numBytes < BufferSize);
+    for (size_t i = 0; i < numBytes; i++)
         buffer[i] = static_cast<uint8_t>(patch >> (i << 3));
-    output.write(buffer.get(), getNumBytes());
+    output.write(buffer.get(), numBytes);
     if (overwrite)
     {
-        pos += getNumBytes();
+        pos += numBytes;
         input.seek(pos, File::Origin::Start);
     }
 
@@ -202,11 +210,11 @@ CRCType CRC::computePatch(
     CRCType checksum2 = computeReversePartialChecksum(
         inputFile,
         inputFile.getSize(),
-        targetPos + (overwrite ? getNumBytes() : 0),
+        targetPos + (overwrite ? numBytes : 0),
         static_cast<CRCType>(targetChecksum ^ finalXOR));
 
     CRCType patch = checksum2;
-    for (size_t i = 0, j = getNumBytes() - 1; i < getNumBytes(); i++, j--)
+    for (size_t i = 0, j = numBytes - 1; i < numBytes; i++, j--)
         patch = makePrevChecksum(patch, (checksum1 >> (j << 3)) & 0xff);
 
     return patch;

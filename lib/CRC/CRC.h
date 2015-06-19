@@ -31,8 +31,6 @@ class CRC
             File::OffsetType endPosition)>
         ProgressFunction;
 
-        virtual size_t getNumBytes() const = 0;
-
         CRC();
         virtual ~CRC();
 
@@ -47,13 +45,18 @@ class CRC
             File &outputFile,
             bool overwrite = false) const;
 
+        size_t getNumBytes() const;
+
     protected:
-        CRC(CRCType initialXOR, CRCType finalXOR);
+        CRC(size_t numBytes,
+            CRCType polynomial,
+            CRCType initialXOR,
+            CRCType finalXOR);
+        size_t numBytes;
+        CRCType polynomial;
+        CRCType polynomialReverse;
         CRCType initialXOR;
         CRCType finalXOR;
-
-        virtual CRCType getPolynomial() const = 0;
-        CRCType getPolynomialReverse() const;
 
         void markProgress(
             ProgressType progressType,
