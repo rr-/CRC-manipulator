@@ -1,3 +1,7 @@
+### 0.3.4
+- Fixed -p, -i and -o arguments
+- Added unit tests so these options never break again
+
 ### 0.3.3
 - Added unit tests using Catch framework
 
