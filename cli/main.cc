@@ -79,11 +79,10 @@ Examples:
     {
         if (str.length() > crc.getNumBytes() * 2)
         {
-            std::cerr
-                << "Error: Specified checksum has more than "
-                << crc.getNumBytes() * 2
-                << " digits.\n";
-            exit(EXIT_FAILURE);
+            throw std::runtime_error(
+                "Error: Specified checksum has more than "
+                + std::to_string(crc.getNumBytes() * 2)
+                + " digits.");
         }
 
         if (str.length() < crc.getNumBytes() * 2)
@@ -95,14 +94,13 @@ Examples:
         }
 
         const std::string allowedCharacters = "0123456789abcdefABCDEF";
-        for (size_t i = 0; i < str.length(); i++)
+        for (auto &c : str)
         {
-            if (allowedCharacters.find(str[i]) == std::string::npos)
+            if (allowedCharacters.find(c) == std::string::npos)
             {
-                std::cerr
-                    << "Error: Specified checksum contains invalid characters. "
-                    << "Only hexadecimal values are accepted.\n";
-                exit(EXIT_FAILURE);
+                throw std::runtime_error(
+                    "Error: Specified checksum contains invalid characters.\n"
+                    "Only hexadecimal values are accepted.\n");
             }
         }
     }
@@ -139,81 +137,65 @@ Examples:
             }
         }
 
-        if (args.size() < 1)
+        try
         {
-            std::cerr << "No input file specified.\n";
-            printUsage(std::cerr, crcs);
-            exit(EXIT_FAILURE);
-        }
-        if (args[0] != "")
-            fa.inputPath = args[0];
+            if (args.size() < 1)
+                throw std::runtime_error("No input file specified.");
+            if (args[0] != "-")
+                fa.inputPath = args[0];
 
-        if (args.size() < 2)
-        {
-            std::cerr << "No output file specified.\n";
-            printUsage(std::cerr, crcs);
-            exit(EXIT_FAILURE);
-        }
-        if (args[1] != "-")
-            fa.outputPath = args[1];
+            if (args.size() < 2)
+                throw std::runtime_error("No output file specified.");
+            if (args[1] != "-")
+                fa.outputPath = args[1];
 
-        if (args.size() < 3)
-        {
-            std::cerr << "No checksum specified.\n";
-            printUsage(std::cerr, crcs);
-            exit(EXIT_FAILURE);
-        }
+            if (args.size() < 3)
+                throw std::runtime_error("No checksum specified.");
 
-        for (size_t i = 3; i < args.size(); i++)
-        {
-            auto &arg = args[i];
-            if (arg == "--insert")
-                fa.overwrite = false;
-            else if (arg == "--overwrite")
-                fa.overwrite = true;
-            else if (arg == "-p" || arg == "--pos" || arg == "--position")
+            for (size_t i = 3; i < args.size(); i++)
             {
-                if (i == args.size() - 1)
+                auto &arg = args[i];
+                if (arg == "--insert")
+                    fa.overwrite = false;
+                else if (arg == "--overwrite")
+                    fa.overwrite = true;
+                else if (arg == "-p" || arg == "--pos" || arg == "--position")
                 {
-                    std::cerr << "--position needs an additional parameter.\n";
-                    printUsage(std::cerr, crcs);
-                    exit(EXIT_FAILURE);
+                    if (i == args.size() - 1)
+                        throw std::runtime_error(arg + " needs a parameter.");
+                    auto pos = args[++i];
+                    fa.automaticPosition = false;
+                    fa.position = std::stoll(pos);
                 }
-                arg = args[++i];
-                fa.automaticPosition = false;
-                fa.position = std::stoll(arg);
-            }
-            else if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
-            {
-                if (i == args.size() - 1)
+                else if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
                 {
-                    std::cerr << "--algorithm needs an additional parameter.\n";
-                    printUsage(std::cerr, crcs);
-                    exit(EXIT_FAILURE);
-                }
-                auto algo  = args[++i];
-                bool found = false;
-                for (auto &crc : crcs)
-                {
-                    if (crc->getName() == algo)
+                    if (i == args.size() - 1)
+                        throw std::runtime_error(arg + " needs a parameter.");
+                    auto algo  = args[++i];
+                    bool found = false;
+                    for (auto &crc : crcs)
                     {
-                        fa.crc = crc;
-                        found = true;
-                        break;
+                        if (crc->getName() == algo)
+                        {
+                            fa.crc = crc;
+                            found = true;
+                            break;
+                        }
                     }
-                }
-                if (!found)
-                {
-                    std::cerr << "Unknown algorithm: " << algo << "\n";
-                    printUsage(std::cerr, crcs);
-                    exit(EXIT_FAILURE);
+                    if (!found)
+                        throw std::runtime_error("Unknown algorithm: " + algo);
                 }
             }
+
+            validateChecksum(*fa.crc, args[2]);
+            fa.checksum = std::stoull(args[2], nullptr, 16);
         }
-
-        validateChecksum(*fa.crc, args[2]);
-        fa.checksum = std::stoull(args[2], nullptr, 16);
-
+        catch (std::exception &e)
+        {
+            std::cerr << e.what() << "\n";
+            printUsage(std::cerr, crcs);
+            exit(EXIT_FAILURE);
+        }
         return fa;
     }
 
