@@ -194,7 +194,7 @@ Examples:
         if (args[1] != "-")
             fa.outputPath = args[1];
 
-        if (args.size() < 4)
+        if (args.size() < 3)
         {
             std::cerr << "No checksum specified.\n";
             printUsage(std::cerr);
@@ -207,7 +207,7 @@ Examples:
         fa.automaticPosition = true;
         fa.position = 0;
 
-        for (size_t i = 4; i < args.size(); i++)
+        for (size_t i = 3; i < args.size(); i++)
         {
             auto &arg = args[i];
             if (arg == "--insert")
