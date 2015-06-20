@@ -32,7 +32,12 @@ CRC::CRC()
 }
 
 CRC::CRC(
-    size_t numBytes, CRCType polynomial, CRCType initialXOR, CRCType finalXOR) :
+    const std::string &name,
+    size_t numBytes,
+    CRCType polynomial,
+    CRCType initialXOR,
+    CRCType finalXOR)
+: name(name),
     numBytes(numBytes),
     polynomial(polynomial),
     polynomialReverse(getPolynomialReverse(polynomial, numBytes)),
@@ -70,6 +75,11 @@ CRC::~CRC()
 size_t CRC::getNumBytes() const
 {
     return numBytes;
+}
+
+const std::string &CRC::getName() const
+{
+    return name;
 }
 
 /**

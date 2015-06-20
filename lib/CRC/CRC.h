@@ -13,6 +13,7 @@ typedef uint32_t CRCType;
 class CRC
 {
     private:
+        std::string name;
         size_t numBytes;
         CRCType polynomial;
         CRCType polynomialReverse;
@@ -38,9 +39,11 @@ class CRC
             Progress &checksumProgress) const;
 
         size_t getNumBytes() const;
+        const std::string &getName() const;
 
     protected:
-        CRC(size_t numBytes,
+        CRC(const std::string &name,
+            size_t numBytes,
             CRCType polynomial,
             CRCType initialXOR,
             CRCType finalXOR);

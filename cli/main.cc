@@ -1,5 +1,6 @@
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+#include <memory>
 #include <vector>
 
 #ifndef __unix
@@ -15,12 +16,20 @@
 
 namespace
 {
+    std::vector<std::shared_ptr<CRC>> getAllCrcs()
+    {
+        std::vector<std::shared_ptr<CRC>> crcs;
+        crcs.push_back(std::shared_ptr<CRC>(new CRC32));
+        crcs.push_back(std::shared_ptr<CRC>(new CRC16CCITT));
+        crcs.push_back(std::shared_ptr<CRC>(new CRC16IBM));
+        return crcs;
+    }
 
-    void printUsage(std::ostream &s)
+    void printUsage(std::ostream &s, std::vector<std::shared_ptr<CRC>> crcs)
     {
         s << "CRC manipulator v" << CRCMANIP_VERSION << "\n";
         s << R"(
-Freely reverse and change CRC32 checksums through smart file patching.
+Freely reverse and change CRC checksums through smart file patching.
 Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]
 
 INFILE               input file. if -, standard input will be used.
@@ -35,18 +44,21 @@ OPTIONS can be:
                      n-th byte from the end of file.
     --insert         specifies that patch should be inserted (default)
     --overwrite      specifies that patch should overwrite existing bytes
+-a, --algorithm=ALG  specifies which algorithm to use.
+
+Available algorithms:
 )";
 
-        /*
-        s << R"(
-Available checksum algorithms:
-    --crc32          use crc32 (default)
-    --crc16-ibm      use crc16-ibm, also known as crc16-ansi and crc16
-    --crc16-ccitt    use crc16-ccitt
-    --init-xor=VAL   use custom VAL as initial XOR value
-    --final-xor=VAL  use custom VAL as final XOR value
-)";
-        */
+        bool isDefault = true;
+        for (auto &crc : crcs)
+        {
+            std::cout
+                << "* "
+                << crc->getName()
+                << (isDefault ? " (default)" : "")
+                << "\n";
+            isDefault = false;
+        }
 
         s << R"(
 CHECKSUM must be a hexadecimal value.
@@ -98,7 +110,7 @@ Examples:
     class FacadeArgs
     {
         public:
-            std::unique_ptr<CRC> crc;
+            std::shared_ptr<CRC> crc;
             CRCType checksum;
             std::string inputPath;
             std::string outputPath;
@@ -107,16 +119,22 @@ Examples:
             bool overwrite;
     };
 
-    FacadeArgs parseArguments(std::vector<std::string> args)
+    FacadeArgs parseArguments(
+        std::vector<std::string> args, std::vector<std::shared_ptr<CRC>> crcs)
     {
         FacadeArgs fa;
-        fa.crc.reset(new CRC32);
+        fa.crc = crcs[0];
+        fa.automaticPosition = true;
+        fa.position = 0;
+        fa.overwrite = false;
+        fa.inputPath = "";
+        fa.outputPath = "";
 
         for (auto &arg : args)
         {
             if (arg == "-h" || arg == "--help")
             {
-                printUsage(std::cout);
+                printUsage(std::cout, crcs);
                 exit(EXIT_SUCCESS);
             }
         }
@@ -124,7 +142,7 @@ Examples:
         if (args.size() < 1)
         {
             std::cerr << "No input file specified.\n";
-            printUsage(std::cerr);
+            printUsage(std::cerr, crcs);
             exit(EXIT_FAILURE);
         }
         if (args[0] != "")
@@ -133,7 +151,7 @@ Examples:
         if (args.size() < 2)
         {
             std::cerr << "No output file specified.\n";
-            printUsage(std::cerr);
+            printUsage(std::cerr, crcs);
             exit(EXIT_FAILURE);
         }
         if (args[1] != "-")
@@ -142,16 +160,9 @@ Examples:
         if (args.size() < 3)
         {
             std::cerr << "No checksum specified.\n";
-            printUsage(std::cerr);
+            printUsage(std::cerr, crcs);
             exit(EXIT_FAILURE);
         }
-
-        validateChecksum(*fa.crc, args[2]);
-        fa.checksum = std::stoull(args[2], nullptr, 16);
-
-        fa.automaticPosition = true;
-        fa.position = 0;
-        fa.overwrite = false;
 
         for (size_t i = 3; i < args.size(); i++)
         {
@@ -165,14 +176,43 @@ Examples:
                 if (i == args.size() - 1)
                 {
                     std::cerr << "--position needs an additional parameter.\n";
-                    printUsage(std::cerr);
+                    printUsage(std::cerr, crcs);
                     exit(EXIT_FAILURE);
                 }
                 arg = args[++i];
                 fa.automaticPosition = false;
                 fa.position = std::stoll(arg);
             }
+            else if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
+            {
+                if (i == args.size() - 1)
+                {
+                    std::cerr << "--algorithm needs an additional parameter.\n";
+                    printUsage(std::cerr, crcs);
+                    exit(EXIT_FAILURE);
+                }
+                auto algo  = args[++i];
+                bool found = false;
+                for (auto &crc : crcs)
+                {
+                    if (crc->getName() == algo)
+                    {
+                        fa.crc = crc;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    std::cerr << "Unknown algorithm: " << algo << "\n";
+                    printUsage(std::cerr, crcs);
+                    exit(EXIT_FAILURE);
+                }
+            }
         }
+
+        validateChecksum(*fa.crc, args[2]);
+        fa.checksum = std::stoull(args[2], nullptr, 16);
 
         return fa;
     }
@@ -281,6 +321,7 @@ int main(int argc, char **argv)
     for (int i = 1; i < argc; i++)
         args.push_back(std::string(argv[i]));
 
-    auto fa = parseArguments(args);
+    auto crcs = getAllCrcs();
+    auto fa = parseArguments(args, crcs);
     run(fa);
 }
