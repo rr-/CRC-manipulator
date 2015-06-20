@@ -298,7 +298,7 @@ int main(int argc, char **argv)
         if (arg == "-h" || arg == "--help")
         {
             printUsage(std::cout, crcs);
-            exit(EXIT_SUCCESS);
+            return 0;
         }
     }
 
@@ -319,7 +319,7 @@ int main(int argc, char **argv)
         else if (cmdName == "h" || cmdName == "help")
         {
             printUsage(std::cout, crcs);
-            exit(EXIT_SUCCESS);
+            return 0;
         }
         else
             throw std::invalid_argument("Unknown command: " + cmdName);
@@ -330,17 +330,17 @@ int main(int argc, char **argv)
     {
         std::cerr << e.what() << "\n";
         printUsage(std::cerr, crcs);
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     try
     {
         command->run();
-        exit(EXIT_SUCCESS);
+        return 0;
     }
     catch (std::exception &e)
     {
         std::cerr << e.what() << "\n";
-        exit(EXIT_FAILURE);
+        return 1;
     }
 }
