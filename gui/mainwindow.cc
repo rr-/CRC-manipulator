@@ -61,26 +61,20 @@ namespace
         private:
             void run()
             {
-                crc->setProgressFunction([&](
-                    CRC::ProgressType,
-                    File::OffsetType startPosition,
-                    File::OffsetType currentPosition,
-                    File::OffsetType maxPosition)
-                {
-                    double progress = 0;
-                    if (maxPosition != startPosition)
-                    {
-                        progress = currentPosition - startPosition;
-                        progress *= 100.0;
-                        progress /= maxPosition - startPosition;
-                    }
-                    emit progressChanged(progress);
-                });
+                Progress progress;
+                progress.changed = [&](double percentage)
+                    { emit progressChanged(percentage); };
 
                 try
                 {
                     crc->applyPatch(
-                        checksum, position, *inputFile, *outputFile, false);
+                        checksum,
+                        position,
+                        *inputFile,
+                        *outputFile,
+                        false,
+                        progress,
+                        progress);
                 }
                 catch (std::exception ex)
                 {

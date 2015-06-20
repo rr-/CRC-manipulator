@@ -15,62 +15,6 @@
 
 namespace
 {
-    void updateProgress(
-        CRC::ProgressType progressType,
-        File::OffsetType startPos,
-        File::OffsetType curPos,
-        File::OffsetType endPos)
-    {
-        static int i = 0;
-        static CRC::ProgressType lastProgressType;
-
-        if (lastProgressType != progressType || i == 0)
-        {
-            lastProgressType = progressType;
-            switch (progressType)
-            {
-                case CRC::ProgressType::WriteStart:
-                    std::cout << "Output started" << std::endl;
-                    break;
-
-                case CRC::ProgressType::WriteEnd:
-                    std::cout << "Output ended" << std::endl;
-                    break;
-
-                case CRC::ProgressType::ChecksumStart:
-                    std::cout << "Partial checksum started" << std::endl;
-                    break;
-
-                case CRC::ProgressType::ChecksumEnd:
-                    std::cout << "Partial checksum ended" << std::endl;
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        switch (progressType)
-        {
-            case CRC::ProgressType::WriteProgress:
-            case CRC::ProgressType::ChecksumProgress:
-                if (i % 2500 == 0)
-                {
-                    std::cout
-                        << std::setw(5)
-                        << std::fixed
-                        << std::setprecision(2)
-                        << (curPos - startPos) * 100.0f / (endPos - startPos)
-                        << "% done\r";
-                    std::cout.flush();
-                }
-                ++i;
-                break;
-
-            default:
-                break;
-        }
-    }
 
     void printUsage(std::ostream &s)
     {
@@ -235,7 +179,29 @@ Examples:
 
     void run(FacadeArgs &fa)
     {
-        fa.crc->setProgressFunction(updateProgress);
+        Progress writeProgress;
+        writeProgress.started
+            = []() { std::cout << "Output started" << std::endl; };
+        writeProgress.finished
+            = []() { std::cout << "Output finished" << std::endl; };
+
+        Progress checksumProgress;
+        checksumProgress.started
+            = []() { std::cout << "Partial checksum started" << std::endl; };
+        checksumProgress.finished
+            = []() { std::cout << "Partial checksum finished" << std::endl; };
+
+        checksumProgress.changed = writeProgress.changed
+            = [](double percentage)
+                {
+                    std::cout
+                        << std::setw(5)
+                        << std::fixed
+                        << std::setprecision(2)
+                        << percentage
+                        << "% done\r";
+                        std::cout.flush();
+                };
 
         std::unique_ptr<File> inputFile;
         try
@@ -297,7 +263,13 @@ Examples:
         }
 
         fa.crc->applyPatch(
-            fa.checksum, fa.position, *inputFile, *outputFile, fa.overwrite);
+            fa.checksum,
+            fa.position,
+            *inputFile,
+            *outputFile,
+            fa.overwrite,
+            writeProgress,
+            checksumProgress);
 
         exit(EXIT_SUCCESS);
     }

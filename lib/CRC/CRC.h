@@ -2,6 +2,7 @@
 #define CRC_H
 #include <functional>
 #include "File/File.h"
+#include "Progress.h"
 
 /**
  * Just make it enough to hold any derived CRC.
@@ -11,25 +12,6 @@ typedef uint32_t CRCType;
 
 class CRC
 {
-    //Types, constants
-    public:
-        enum class ProgressType : uint8_t
-        {
-            WriteStart,
-            WriteProgress,
-            WriteEnd,
-            ChecksumStart,
-            ChecksumProgress,
-            ChecksumEnd
-        };
-
-        typedef std::function<void(
-            ProgressType progressType,
-            File::OffsetType startPosition,
-            File::OffsetType currentPosition,
-            File::OffsetType endPosition)>
-        ProgressFunction;
-
     private:
         size_t numBytes;
         CRCType polynomial;
@@ -40,22 +22,20 @@ class CRC
         CRCType lookupTable[256];
         CRCType invLookupTable[256];
 
-        ProgressFunction progressFunction;
-
     public:
         CRC();
         virtual ~CRC();
 
-        void setProgressFunction(const ProgressFunction &progressFunction);
-
-        CRCType computeChecksum(File &inputFile) const;
+        CRCType computeChecksum(File &inputFile, Progress &progress) const;
 
         void applyPatch(
             CRCType targetChecksum,
             File::OffsetType targetPosition,
             File &inputFile,
             File &outputFile,
-            bool overwrite = false) const;
+            bool overwrite,
+            Progress &writeProgress,
+            Progress &checksumProgress) const;
 
         size_t getNumBytes() const;
 
@@ -66,29 +46,26 @@ class CRC
             CRCType finalXOR);
 
     private:
-        void markProgress(
-            ProgressType progressType,
-            File::OffsetType startPosition,
-            File::OffsetType currentPosition,
-            File::OffsetType endPosition) const;
-
         CRCType computePartialChecksum(
             File &inputFile,
             File::OffsetType startPosition,
             File::OffsetType endPosition,
-            CRCType initialChecksum = 0) const;
+            CRCType initialChecksum,
+            Progress &progress) const;
 
         CRCType computeReversePartialChecksum(
             File &inputFile,
             File::OffsetType startPosition,
             File::OffsetType endPosition,
-            CRCType initialChecksum = 0) const;
+            CRCType initialChecksum,
+            Progress &progress) const;
 
         virtual CRCType computePatch(
             CRCType targetChecksum,
             File::OffsetType targetPosition,
             File &inputFile,
-            bool overwrite = false) const;
+            bool overwrite,
+            Progress &progress) const;
 
         /**
          * The following methods calculate new checksums based on
