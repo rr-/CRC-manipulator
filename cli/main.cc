@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <memory>
@@ -26,20 +27,24 @@ namespace
         s << "CRC manipulator v" << CRCMANIP_VERSION << "\n";
         s << R"(
 Freely reverse and change CRC checksums through smart file patching.
-Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]
+Usage: crcmanip p[atch] INFILE OUTFILE CHECKSUM [PATCH_OPTIONS]
+   or: crcmanip c[alc]  INFILE [CALC_OPTIONS]
+   or: crcmanip h[elp]
 
 INFILE               path to input file.
 OUTFILE              path to output file.
-CHECKSUM             target checksum.
+CHECKSUM             target checksum; must be a hexadecimal value.
 
-OPTIONS can be:
--h, --help           print this information.
+PATCH_OPTIONS can be:
+-a, --algorithm=ALG  specifies which algorithm to use.
 -p, --position=NUM   position where to append the patch. Unless specified,
                      patch will be placed at the end of the input file.
                      If position is negative, patch will be placed at the
                      n-th byte from the end of file.
     --insert         specifies that patch should be inserted (default)
     --overwrite      specifies that patch should overwrite existing bytes
+
+CALC_OPTIONS can be:
 -a, --algorithm=ALG  specifies which algorithm to use.
 
 Available algorithms:
@@ -57,11 +62,10 @@ Available algorithms:
         }
 
         s << R"(
-CHECKSUM must be a hexadecimal value.
-
 Examples:
-./crcmanip input.txt output.txt 1234abcd
-./crcmanip input.txt output.txt 1234abcd -p -1
+./crcmanip p input.txt output.txt 1234abcd
+./crcmanip patch input.txt output.txt 1234abcd -p -1
+./crcmanip calc input.txt -a CRC16IBM
 )";
     }
 
@@ -95,45 +99,111 @@ Examples:
         }
     }
 
-    class FacadeArgs
+    class Command
     {
         public:
-            std::shared_ptr<CRC> crc;
-            CRCType checksum;
-            std::string inputPath;
-            std::string outputPath;
-            File::OffsetType position;
-            bool automaticPosition;
-            bool overwrite;
+            virtual void parse(std::vector<std::string> args) = 0;
+            virtual void run() const = 0;
     };
 
-    FacadeArgs parseArguments(
-        std::vector<std::string> args, std::vector<std::shared_ptr<CRC>> crcs)
+    class CalculateCommand : public Command
     {
-        FacadeArgs fa;
-        fa.crc = crcs[0];
-        fa.automaticPosition = true;
-        fa.position = 0;
-        fa.overwrite = false;
-        fa.inputPath = "";
-        fa.outputPath = "";
+        public:
+            CalculateCommand(std::vector<std::shared_ptr<CRC>> crcs);
+            virtual void parse(std::vector<std::string> args);
+            virtual void run() const;
 
-        for (auto &arg : args)
-        {
-            if (arg == "-h" || arg == "--help")
-            {
-                printUsage(std::cout, crcs);
-                exit(EXIT_SUCCESS);
-            }
-        }
+        private:
+            std::shared_ptr<CRC> crc;
+            std::unique_ptr<File> inputFile;
+
+            std::vector<std::shared_ptr<CRC>> crcs;
+    };
+
+    CalculateCommand::CalculateCommand(std::vector<std::shared_ptr<CRC>> crcs)
+        : crcs(crcs)
+    {
+    }
+
+    void CalculateCommand::parse(std::vector<std::string> args)
+    {
+        crc = crcs[0];
 
         if (args.size() < 1)
             throw std::runtime_error("No input file specified.");
-        fa.inputPath = args[0];
+        inputFile = File::fromFileName(
+            args[0], File::Mode::Read | File::Mode::Binary);
+
+        for (size_t i = 1; i < args.size(); i++)
+        {
+            auto &arg = args[i];
+            if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
+            {
+                if (i == args.size() - 1)
+                    throw std::runtime_error(arg + " needs a parameter.");
+                auto algo  = args[++i];
+                auto it = std::find_if(
+                    crcs.begin(), crcs.end(), [&](std::shared_ptr<CRC> crc)
+                    { return crc->getName() == algo; });
+                if (it == crcs.end())
+                    throw std::runtime_error("Unknown algorithm: " + algo);
+                crc = *it;
+            }
+        }
+    }
+
+    void CalculateCommand::run() const
+    {
+        Progress dummyProgress;
+        auto checksum = crc->computeChecksum(*inputFile, dummyProgress);
+        std::cout
+            << std::hex
+            << std::setw(crc->getNumBytes() * 2)
+            << std::setfill('0')
+            << checksum
+            << std::endl;
+    }
+
+    class PatchCommand : public Command
+    {
+        public:
+            PatchCommand(std::vector<std::shared_ptr<CRC>> crcs);
+            virtual void parse(std::vector<std::string> args);
+            virtual void run() const;
+
+        private:
+            std::shared_ptr<CRC> crc;
+            std::unique_ptr<File> inputFile;
+            std::unique_ptr<File> outputFile;
+            CRCType checksum;
+            File::OffsetType position;
+            bool positionSupplied;
+            bool overwrite;
+
+            std::vector<std::shared_ptr<CRC>> crcs;
+    };
+
+    PatchCommand::PatchCommand(std::vector<std::shared_ptr<CRC>> crcs)
+        : crcs(crcs)
+    {
+    }
+
+    void PatchCommand::parse(std::vector<std::string> args)
+    {
+        crc = crcs[0];
+        positionSupplied = false;
+        position = 0;
+        overwrite = false;
+
+        if (args.size() < 1)
+            throw std::runtime_error("No input file specified.");
+        inputFile = File::fromFileName(
+            args[0], File::Mode::Read | File::Mode::Binary);
 
         if (args.size() < 2)
             throw std::runtime_error("No output file specified.");
-        fa.outputPath = args[1];
+        outputFile = File::fromFileName(
+            args[1], File::Mode::Write | File::Mode::Binary);
 
         if (args.size() < 3)
             throw std::runtime_error("No checksum specified.");
@@ -142,57 +212,46 @@ Examples:
         {
             auto &arg = args[i];
             if (arg == "--insert")
-                fa.overwrite = false;
+                overwrite = false;
             else if (arg == "--overwrite")
-                fa.overwrite = true;
+                overwrite = true;
             else if (arg == "-p" || arg == "--pos" || arg == "--position")
             {
                 if (i == args.size() - 1)
                     throw std::runtime_error(arg + " needs a parameter.");
                 auto pos = args[++i];
-                fa.automaticPosition = false;
-                fa.position = std::stoll(pos);
+                positionSupplied = true;
+                position = std::stoll(pos);
             }
             else if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
             {
                 if (i == args.size() - 1)
                     throw std::runtime_error(arg + " needs a parameter.");
                 auto algo  = args[++i];
-                bool found = false;
-                for (auto &crc : crcs)
-                {
-                    if (crc->getName() == algo)
-                    {
-                        fa.crc = crc;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
+                auto it = std::find_if(
+                    crcs.begin(), crcs.end(), [&](std::shared_ptr<CRC> crc)
+                    { return crc->getName() == algo; });
+                if (it == crcs.end())
                     throw std::runtime_error("Unknown algorithm: " + algo);
+                crc = *it;
             }
         }
 
-        validateChecksum(*fa.crc, args[2]);
-        fa.checksum = std::stoull(args[2], nullptr, 16);
-        return fa;
+        validateChecksum(*crc, args[2]);
+        checksum = std::stoull(args[2], nullptr, 16);
     }
 
-    void run(FacadeArgs &fa)
+    void PatchCommand::run() const
     {
         Progress writeProgress;
-        writeProgress.started
-            = []() { std::cout << "Output started" << std::endl; };
-        writeProgress.finished
-            = []() { std::cout << "Output finished" << std::endl; };
+        writeProgress.started = []() { std::cout << "Output started\n"; };
+        writeProgress.finished = []() { std::cout << "Output finished\n"; };
 
-        Progress checksumProgress;
-        checksumProgress.started
-            = []() { std::cout << "Partial checksum started" << std::endl; };
-        checksumProgress.finished
-            = []() { std::cout << "Partial checksum finished" << std::endl; };
+        Progress crcProgress;
+        crcProgress.started = []() { std::cout << "Checksum started\n"; };
+        crcProgress.finished = []() { std::cout << "Checksum finished\n"; };
 
-        checksumProgress.changed = writeProgress.changed
+        crcProgress.changed = writeProgress.changed
             = [](double percentage)
                 {
                     std::cout
@@ -204,36 +263,25 @@ Examples:
                         std::cout.flush();
                 };
 
-        std::unique_ptr<File> inputFile;
-        inputFile = File::fromFileName(
-            fa.inputPath, File::Mode::Read | File::Mode::Binary);
-
-        if (fa.automaticPosition)
-        {
-            fa.position = computeAutoPosition(
-                inputFile->getSize(), fa.crc->getNumBytes(), fa.overwrite);
-        }
-        else
-        {
-            fa.position = shiftUserPosition(
-                fa.position,
+        auto correctedPosition = positionSupplied
+            ? shiftUserPosition(
+                position,
                 inputFile->getSize(),
-                fa.crc->getNumBytes(),
-                fa.overwrite);
-        }
+                crc->getNumBytes(),
+                overwrite)
+            : computeAutoPosition(
+                inputFile->getSize(),
+                crc->getNumBytes(),
+                overwrite);
 
-        std::unique_ptr<File> outputFile;
-        outputFile = File::fromFileName(
-            fa.outputPath, File::Mode::Write | File::Mode::Binary);
-
-        fa.crc->applyPatch(
-            fa.checksum,
-            fa.position,
+        crc->applyPatch(
+            checksum,
+            correctedPosition,
             *inputFile,
             *outputFile,
-            fa.overwrite,
+            overwrite,
             writeProgress,
-            checksumProgress);
+            crcProgress);
     }
 }
 
@@ -245,10 +293,38 @@ int main(int argc, char **argv)
 
     auto crcs = getAllCrcs();
 
-    FacadeArgs fa;
+    for (auto &arg : args)
+    {
+        if (arg == "-h" || arg == "--help")
+        {
+            printUsage(std::cout, crcs);
+            exit(EXIT_SUCCESS);
+        }
+    }
+
+    std::unique_ptr<Command> command;
     try
     {
-        fa = parseArguments(args, crcs);
+        if (args.size() < 1)
+            throw std::runtime_error("No command chosen.");
+
+        auto cmdName = args[0];
+        args.erase(args.begin());
+        cmdName.erase(0, cmdName.find_first_not_of('-'));
+
+        if (cmdName == "p" || cmdName == "patch")
+            command.reset(new PatchCommand(crcs));
+        else if (cmdName == "c" || cmdName == "calc" || cmdName == "calculate")
+            command.reset(new CalculateCommand(crcs));
+        else if (cmdName == "h" || cmdName == "help")
+        {
+            printUsage(std::cout, crcs);
+            exit(EXIT_SUCCESS);
+        }
+        else
+            throw std::invalid_argument("Unknown command: " + cmdName);
+
+        command->parse(args);
     }
     catch (std::exception &e)
     {
@@ -259,7 +335,7 @@ int main(int argc, char **argv)
 
     try
     {
-        run(fa);
+        command->run();
         exit(EXIT_SUCCESS);
     }
     catch (std::exception &e)
