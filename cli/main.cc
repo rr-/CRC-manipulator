@@ -3,10 +3,6 @@
 #include <memory>
 #include <vector>
 
-#ifndef __unix
-    #include <sys/fcntl.h> // for setmode
-#endif
-
 #include "CRC/CRC.h"
 #include "CRC/CRC16CCITT.h"
 #include "CRC/CRC16IBM.h"
@@ -32,8 +28,8 @@ namespace
 Freely reverse and change CRC checksums through smart file patching.
 Usage: crcmanip INFILE OUTFILE CHECKSUM [OPTIONS]
 
-INFILE               input file. if -, standard input will be used.
-OUTFILE              output file. if -, standard output will be used.
+INFILE               path to input file.
+OUTFILE              path to output file.
 CHECKSUM             target checksum.
 
 OPTIONS can be:
@@ -62,15 +58,10 @@ Available algorithms:
 
         s << R"(
 CHECKSUM must be a hexadecimal value.
-INFILE must be seekable stream. In other words, it cannot be a pipe
-(particularly standard input), fifo etc.
 
 Examples:
 ./crcmanip input.txt output.txt 1234abcd
 ./crcmanip input.txt output.txt 1234abcd -p -1
-./crcmanip input.txt - 1234abcd >output.txt
-./crcmanip - output.txt 1234abcd <input.txt
-./crcmanip - - 1234abcd <input.txt >output.txt
 )";
     }
 
@@ -140,13 +131,11 @@ Examples:
         {
             if (args.size() < 1)
                 throw std::runtime_error("No input file specified.");
-            if (args[0] != "-")
-                fa.inputPath = args[0];
+            fa.inputPath = args[0];
 
             if (args.size() < 2)
                 throw std::runtime_error("No output file specified.");
-            if (args[1] != "-")
-                fa.outputPath = args[1];
+            fa.outputPath = args[1];
 
             if (args.size() < 3)
                 throw std::runtime_error("No checksum specified.");
@@ -227,18 +216,8 @@ Examples:
         std::unique_ptr<File> inputFile;
         try
         {
-            if (fa.inputPath == "")
-            {
-                #ifndef __unix
-                    setmode(fileno(stdin), O_BINARY);
-                #endif
-                inputFile = File::fromFileHandle(stdin);
-            }
-            else
-            {
-                inputFile = File::fromFileName(
-                    fa.inputPath, File::Mode::Read | File::Mode::Binary);
-            }
+            inputFile = File::fromFileName(
+                fa.inputPath, File::Mode::Read | File::Mode::Binary);
         }
         catch (...)
         {
@@ -263,18 +242,8 @@ Examples:
         std::unique_ptr<File> outputFile;
         try
         {
-            if (fa.outputPath == "")
-            {
-                #ifndef __unix
-                    setmode(fileno(stdout), O_BINARY);
-                #endif
-                outputFile = File::fromFileHandle(stdout);
-            }
-            else
-            {
-                outputFile = File::fromFileName(
-                    fa.outputPath, File::Mode::Write | File::Mode::Binary);
-            }
+            outputFile = File::fromFileName(
+                fa.outputPath, File::Mode::Write | File::Mode::Binary);
         }
         catch (...)
         {
