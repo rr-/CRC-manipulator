@@ -54,6 +54,7 @@ def configure_flags(ctx):
             ctx.env.CXXFLAGS += ['-ggdb']
         Logs.info('Debug information enabled')
     else:
+        ctx.env.CXXFLAGS += ['-O3']
         Logs.info('Debug information disabled, pass -d to enable')
 
 def configure_features(ctx):
