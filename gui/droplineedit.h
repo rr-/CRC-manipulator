@@ -1,6 +1,5 @@
 #ifndef DROPLINEEDIT_H
 #define DROPLINEEDIT_H
-
 #include <QLineEdit>
 #include <QDragEnterEvent>
 
