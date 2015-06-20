@@ -1,3 +1,16 @@
+### 0.4
+- Restored support for CRC16CCITT and CRC16IBM in CLI
+- Restored support for calculating CRCs in CLI
+- Fixed CLI --help returning 1 instead of 0
+- Added optimization flags to build script
+- Removed test binaries from distribution in build script
+- Further code cleanup:
+  - CRC32, CRC16IBM and CRC16CCITT implementations merged into common code
+  - Improved CLI error handling
+  - Improved progress handling
+  - Removed stdin/stdout support leftovers
+  - Replaced exit() calls with return statements
+
 ### 0.3.4
 - Fixed -p, -i and -o arguments
 - Added unit tests so these options never break again

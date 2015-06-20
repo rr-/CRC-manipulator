@@ -1,7 +1,7 @@
 CRC-manipulator
 ===============
 
-A tool that lets you reverse and freely change CRC32 checksums through smart
+A tool that lets you reverse and freely change CRC checksums through smart
 file patching.
 
 ### How it works
@@ -11,9 +11,12 @@ computes to given hexadecimal hash.
 
 ### Features
 
-- CRC32, but might add support for other CRC checksums in the future.
+- Patching and calculating CRC checksums for:
+  - CRC32
+  - CRC16CCITT
+  - CRC16IBM
 - Available for GNU/Linux and Windows.
-- Simple GUI (for more advanced options, use CLI version).
+- Minimal GUI (supports CRC32 only; for more advanced options, use CLI version).
 
 ### Binaries for Windows
 
