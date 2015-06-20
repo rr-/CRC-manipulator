@@ -72,7 +72,6 @@ Examples:
 ./crcmanip - output.txt 1234abcd <input.txt
 ./crcmanip - - 1234abcd <input.txt >output.txt
 )";
-        exit(EXIT_FAILURE);
     }
 
     void validateChecksum(CRC &crc, const std::string &str)
