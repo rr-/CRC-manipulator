@@ -127,63 +127,54 @@ Examples:
             }
         }
 
-        try
+        if (args.size() < 1)
+            throw std::runtime_error("No input file specified.");
+        fa.inputPath = args[0];
+
+        if (args.size() < 2)
+            throw std::runtime_error("No output file specified.");
+        fa.outputPath = args[1];
+
+        if (args.size() < 3)
+            throw std::runtime_error("No checksum specified.");
+
+        for (size_t i = 3; i < args.size(); i++)
         {
-            if (args.size() < 1)
-                throw std::runtime_error("No input file specified.");
-            fa.inputPath = args[0];
-
-            if (args.size() < 2)
-                throw std::runtime_error("No output file specified.");
-            fa.outputPath = args[1];
-
-            if (args.size() < 3)
-                throw std::runtime_error("No checksum specified.");
-
-            for (size_t i = 3; i < args.size(); i++)
+            auto &arg = args[i];
+            if (arg == "--insert")
+                fa.overwrite = false;
+            else if (arg == "--overwrite")
+                fa.overwrite = true;
+            else if (arg == "-p" || arg == "--pos" || arg == "--position")
             {
-                auto &arg = args[i];
-                if (arg == "--insert")
-                    fa.overwrite = false;
-                else if (arg == "--overwrite")
-                    fa.overwrite = true;
-                else if (arg == "-p" || arg == "--pos" || arg == "--position")
-                {
-                    if (i == args.size() - 1)
-                        throw std::runtime_error(arg + " needs a parameter.");
-                    auto pos = args[++i];
-                    fa.automaticPosition = false;
-                    fa.position = std::stoll(pos);
-                }
-                else if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
-                {
-                    if (i == args.size() - 1)
-                        throw std::runtime_error(arg + " needs a parameter.");
-                    auto algo  = args[++i];
-                    bool found = false;
-                    for (auto &crc : crcs)
-                    {
-                        if (crc->getName() == algo)
-                        {
-                            fa.crc = crc;
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found)
-                        throw std::runtime_error("Unknown algorithm: " + algo);
-                }
+                if (i == args.size() - 1)
+                    throw std::runtime_error(arg + " needs a parameter.");
+                auto pos = args[++i];
+                fa.automaticPosition = false;
+                fa.position = std::stoll(pos);
             }
+            else if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
+            {
+                if (i == args.size() - 1)
+                    throw std::runtime_error(arg + " needs a parameter.");
+                auto algo  = args[++i];
+                bool found = false;
+                for (auto &crc : crcs)
+                {
+                    if (crc->getName() == algo)
+                    {
+                        fa.crc = crc;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    throw std::runtime_error("Unknown algorithm: " + algo);
+            }
+        }
 
-            validateChecksum(*fa.crc, args[2]);
-            fa.checksum = std::stoull(args[2], nullptr, 16);
-        }
-        catch (std::exception &e)
-        {
-            std::cerr << e.what() << "\n";
-            printUsage(std::cerr, crcs);
-            exit(EXIT_FAILURE);
-        }
+        validateChecksum(*fa.crc, args[2]);
+        fa.checksum = std::stoull(args[2], nullptr, 16);
         return fa;
     }
 
@@ -214,16 +205,8 @@ Examples:
                 };
 
         std::unique_ptr<File> inputFile;
-        try
-        {
-            inputFile = File::fromFileName(
-                fa.inputPath, File::Mode::Read | File::Mode::Binary);
-        }
-        catch (...)
-        {
-            std::cerr << "Failed to open " << fa.inputPath << " for reading.\n";
-            exit(EXIT_FAILURE);
-        }
+        inputFile = File::fromFileName(
+            fa.inputPath, File::Mode::Read | File::Mode::Binary);
 
         if (fa.automaticPosition)
         {
@@ -240,17 +223,8 @@ Examples:
         }
 
         std::unique_ptr<File> outputFile;
-        try
-        {
-            outputFile = File::fromFileName(
-                fa.outputPath, File::Mode::Write | File::Mode::Binary);
-        }
-        catch (...)
-        {
-            std::cerr
-                << "Failed to open " << fa.outputPath << " for writing.\n";
-            exit(EXIT_FAILURE);
-        }
+        outputFile = File::fromFileName(
+            fa.outputPath, File::Mode::Write | File::Mode::Binary);
 
         fa.crc->applyPatch(
             fa.checksum,
@@ -260,8 +234,6 @@ Examples:
             fa.overwrite,
             writeProgress,
             checksumProgress);
-
-        exit(EXIT_SUCCESS);
     }
 }
 
@@ -272,6 +244,27 @@ int main(int argc, char **argv)
         args.push_back(std::string(argv[i]));
 
     auto crcs = getAllCrcs();
-    auto fa = parseArguments(args, crcs);
-    run(fa);
+
+    FacadeArgs fa;
+    try
+    {
+        fa = parseArguments(args, crcs);
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << e.what() << "\n";
+        printUsage(std::cerr, crcs);
+        exit(EXIT_FAILURE);
+    }
+
+    try
+    {
+        run(fa);
+        exit(EXIT_SUCCESS);
+    }
+    catch (std::exception &e)
+    {
+        std::cerr << e.what() << "\n";
+        exit(EXIT_FAILURE);
+    }
 }

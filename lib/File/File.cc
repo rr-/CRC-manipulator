@@ -22,7 +22,10 @@ std::unique_ptr<File> File::fromFileName(const std::string &fileName, int mode)
 
     FILE *fileHandle = fopen(fileName.c_str(), modeString.c_str());
     if (fileHandle == nullptr)
-        throw std::runtime_error("Couldn't open file");
+    {
+        throw std::runtime_error("Couldn't open file for " +
+            std::string(mode & Mode::Write ? "writing" : "reading"));
+    }
     return fromFileHandle(fileHandle);
 }
 
