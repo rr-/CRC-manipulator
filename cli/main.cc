@@ -31,13 +31,13 @@ Usage: crcmanip p[atch] INFILE OUTFILE CHECKSUM [PATCH_OPTIONS]
    or: crcmanip c[alc]  INFILE [CALC_OPTIONS]
    or: crcmanip h[elp]
 
-INFILE               path to input file.
-OUTFILE              path to output file.
-CHECKSUM             target checksum; must be a hexadecimal value.
+INFILE               path to input file
+OUTFILE              path to output file
+CHECKSUM             target checksum; must be a hexadecimal value
 
 PATCH_OPTIONS can be:
--a, --algorithm=ALG  specifies which algorithm to use.
--p, --position=NUM   position where to append the patch. Unless specified,
+-a, --algorithm ALG  specifies which algorithm to use
+-p, --position NUM   position where to append the patch. Unless specified,
                      patch will be placed at the end of the input file.
                      If position is negative, patch will be placed at the
                      n-th byte from the end of file.
@@ -45,7 +45,7 @@ PATCH_OPTIONS can be:
     --overwrite      specifies that patch should overwrite existing bytes
 
 CALC_OPTIONS can be:
--a, --algorithm=ALG  specifies which algorithm to use.
+-a, --algorithm ALG  specifies which algorithm to use
 
 Available algorithms:
 )";
