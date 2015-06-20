@@ -11,6 +11,7 @@
 #include "CRC/CRC16IBM.h"
 #include "CRC/CRC32.h"
 #include "File/File.h"
+#include "util.h"
 
 namespace
 {
@@ -206,6 +207,7 @@ Examples:
 
         fa.automaticPosition = true;
         fa.position = 0;
+        fa.overwrite = false;
 
         for (size_t i = 3; i < args.size(); i++)
         {
@@ -257,26 +259,18 @@ Examples:
             exit(EXIT_FAILURE);
         }
 
-        auto totalSize = inputFile->getSize();
-        if (!fa.overwrite)
-            totalSize += fa.crc->getNumBytes();
-
         if (fa.automaticPosition)
         {
-            fa.position = fa.overwrite
-                ? totalSize - fa.crc->getNumBytes()
-                : totalSize;
+            fa.position = computeAutoPosition(
+                inputFile->getSize(), fa.crc->getNumBytes(), fa.overwrite);
         }
-
-        if (fa.position < 0)
-            fa.position += totalSize;
-
-        if (fa.position < 0 ||
-            fa.position + static_cast<File::OffsetType>(fa.crc->getNumBytes())
-                > totalSize)
+        else
         {
-            std::cerr << "Patch position is located outside available input.\n";
-            exit(EXIT_FAILURE);
+            fa.position = shiftUserPosition(
+                fa.position,
+                inputFile->getSize(),
+                fa.crc->getNumBytes(),
+                fa.overwrite);
         }
 
         std::unique_ptr<File> outputFile;
