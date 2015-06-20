@@ -31,7 +31,8 @@ CRC::CRC()
 {
 }
 
-CRC::CRC(size_t numBytes, CRCType polynomial, CRCType initialXOR, CRCType finalXOR) :
+CRC::CRC(
+    size_t numBytes, CRCType polynomial, CRCType initialXOR, CRCType finalXOR) :
     numBytes(numBytes),
     polynomial(polynomial),
     polynomialReverse(getPolynomialReverse(polynomial, numBytes)),

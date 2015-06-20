@@ -1,9 +1,21 @@
 #include "util.h"
 
+namespace
+{
+    void validatePosition(
+        File::OffsetType position, size_t crcSize, File::OffsetType totalSize)
+    {
+        if (position < 0 ||
+            position + static_cast<File::OffsetType>(crcSize) > totalSize)
+        {
+            throw std::invalid_argument(
+                "Patch position is located outside available input");
+        }
+    }
+}
+
 File::OffsetType computeAutoPosition(
-    File::OffsetType fileSize,
-    size_t crcSize,
-    bool overwrite)
+    File::OffsetType fileSize, size_t crcSize, bool overwrite)
 {
     auto totalSize = fileSize;
     if (!overwrite)
@@ -20,13 +32,7 @@ File::OffsetType computeAutoPosition(
             : fileSize;
     }
 
-    if (targetPosition < 0 ||
-        targetPosition + static_cast<File::OffsetType>(crcSize) > totalSize)
-    {
-        throw std::invalid_argument(
-            "Patch position is located outside available input");
-    }
-
+    validatePosition(targetPosition, crcSize, totalSize);
     return targetPosition;
 }
 
@@ -44,12 +50,6 @@ File::OffsetType shiftUserPosition(
     while (targetPosition < 0)
         targetPosition += fileSize;
 
-    if (targetPosition < 0 ||
-        targetPosition + static_cast<File::OffsetType>(crcSize) > totalSize)
-    {
-        throw std::invalid_argument(
-            "Patch position is located outside available input");
-    }
-
+    validatePosition(targetPosition, crcSize, totalSize);
     return targetPosition;
 }

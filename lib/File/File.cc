@@ -6,8 +6,7 @@ std::unique_ptr<File> File::fromFileHandle(FILE *fileHandle)
     return std::unique_ptr<File>(new File(fileHandle));
 }
 
-std::unique_ptr<File> File::fromFileName(
-    const std::string &fileName, int mode)
+std::unique_ptr<File> File::fromFileName(const std::string &fileName, int mode)
 {
     std::string modeString;
 
@@ -62,7 +61,7 @@ File &File::seek(OffsetType offset, Origin origin)
             break;
 
         case Origin::Behind:
-            destination = - offset;
+            destination = -offset;
             type = SEEK_CUR;
             break;
 
@@ -91,7 +90,6 @@ File &File::seek(OffsetType offset, Origin origin)
     #endif
     if (ret != 0)
         throw std::runtime_error("Failed to seek file");
-
     return *this;
 }
 
@@ -124,7 +122,10 @@ File &File::read(unsigned char *buffer, size_t size)
         throw std::runtime_error("Trying to read content beyond EOF");
 
     if (fread(buffer, sizeof(unsigned char), size, fileHandle) != size)
-        throw std::runtime_error("Can't read bytes at " + std::to_string(tell()));
+    {
+        throw std::runtime_error("Can't read bytes at "
+            + std::to_string(tell()));
+    }
 
     return *this;
 }
