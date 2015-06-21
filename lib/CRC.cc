@@ -38,7 +38,133 @@ namespace
     }
 }
 
-CRC::CRC(const CRC::Specs &specs) : specs(specs)
+struct CRC::Internals
+{
+    CRC &crc;
+    Specs specs;
+
+    Value lookupTable[256];
+    Value invLookupTable[256];
+
+    Internals(CRC &crc, const CRC::Specs &specs);
+
+    Value computePartialChecksum(
+        File &inputFile,
+        File::OffsetType startPosition,
+        File::OffsetType endPosition,
+        Value initialChecksum,
+        Progress &progress) const;
+
+    Value computeReversePartialChecksum(
+        File &inputFile,
+        File::OffsetType startPosition,
+        File::OffsetType endPosition,
+        Value initialChecksum,
+        Progress &progress) const;
+
+    Value computePatch(
+        Value targetChecksum,
+        File::OffsetType targetPosition,
+        File &inputFile,
+        bool overwrite,
+        Progress &progress) const;
+
+    Value next(Value prevChecksum, uint8_t c) const;
+    Value prev(Value nextChecksum, uint8_t c) const;
+};
+
+CRC::CRC(const CRC::Specs &specs) : internals(new Internals(*this, specs))
+{
+}
+
+CRC::~CRC()
+{
+}
+
+const CRC::Specs &CRC::getSpecs() const
+{
+    return internals->specs;
+}
+
+/**
+ * Method that copies the input to the output, outputting
+ * computed patch at given position along the way.
+ */
+void CRC::applyPatch(
+    CRC::Value finalChecksum,
+    File::OffsetType targetPos,
+    File &input,
+    File &output,
+    bool overwrite,
+    Progress &writeProgress,
+    Progress &checksumProgress) const
+{
+    std::unique_ptr<uint8_t[]> buffer(new uint8_t[BufferSize]);
+    CRC::Value patch = internals->computePatch(
+        finalChecksum, targetPos, input, overwrite, checksumProgress);
+
+    input.seek(0, File::Origin::Start);
+    File::OffsetType pos = input.tell();
+    writeProgress.start(input.getSize());
+
+    //output first half
+    while (pos < targetPos)
+    {
+        writeProgress.set(pos);
+        auto chunkSize = getChunkSize(pos, targetPos);
+        input.read(buffer.get(), chunkSize);
+        output.write(buffer.get(), chunkSize);
+        pos += chunkSize;
+    }
+
+    //output patch
+    assert(internals->specs.numBytes < BufferSize);
+    for (size_t i = 0; i < internals->specs.numBytes; i++)
+        buffer[i] = static_cast<uint8_t>(patch >> (i << 3));
+    output.write(buffer.get(), internals->specs.numBytes);
+    if (overwrite)
+    {
+        pos += internals->specs.numBytes;
+        input.seek(pos, File::Origin::Start);
+    }
+
+    //output second half
+    while (pos < input.getSize())
+    {
+        writeProgress.set(pos);
+        auto chunkSize = getChunkSize(pos, input.getSize());
+        input.read(buffer.get(), chunkSize);
+        output.write(buffer.get(), chunkSize);
+        pos += chunkSize;
+    }
+
+    writeProgress.finish();
+}
+
+/**
+ * Computes the checksum of given file.
+ * NOTICE: Leaves internal file pointer position intact.
+ */
+CRC::Value CRC::computeChecksum(File &input, Progress &progress) const
+{
+    CRC::Value checksum = internals->specs.initialXOR;
+    checksum = internals->computePartialChecksum(
+        input, 0, input.getSize(), checksum, progress);
+
+    if (internals->specs.flags & CRC::Flags::UseFileSize)
+    {
+        auto fileSize = input.getSize();
+        while (fileSize)
+        {
+            checksum = internals->next(checksum, fileSize);
+            fileSize >>= 8;
+        }
+    }
+    return checksum ^ internals->specs.finalXOR;
+}
+
+CRC::Internals::Internals(CRC &crc, const CRC::Specs &specs)
+    : crc(crc), specs(specs)
 {
     auto poly = specs.polynomial;
     auto polyRev = getPolynomialReverse(poly, specs.numBytes);
@@ -79,97 +205,7 @@ CRC::CRC(const CRC::Specs &specs) : specs(specs)
     }
 }
 
-CRC::~CRC()
-{
-}
-
-const CRC::Specs &CRC::getSpecs() const
-{
-    return specs;
-}
-
-/**
- * Method that copies the input to the output, outputting
- * computed patch at given position along the way.
- */
-void CRC::applyPatch(
-    CRC::Value finalChecksum,
-    File::OffsetType targetPos,
-    File &input,
-    File &output,
-    bool overwrite,
-    Progress &writeProgress,
-    Progress &checksumProgress) const
-{
-    std::unique_ptr<uint8_t[]> buffer(new uint8_t[BufferSize]);
-    CRC::Value patch = computePatch(
-        finalChecksum, targetPos, input, overwrite, checksumProgress);
-
-    input.seek(0, File::Origin::Start);
-    File::OffsetType pos = input.tell();
-    writeProgress.start(input.getSize());
-
-    //output first half
-    while (pos < targetPos)
-    {
-        writeProgress.set(pos);
-        auto chunkSize = getChunkSize(pos, targetPos);
-        input.read(buffer.get(), chunkSize);
-        output.write(buffer.get(), chunkSize);
-        pos += chunkSize;
-    }
-
-    //output patch
-    assert(specs.numBytes < BufferSize);
-    for (size_t i = 0; i < specs.numBytes; i++)
-        buffer[i] = static_cast<uint8_t>(patch >> (i << 3));
-    output.write(buffer.get(), specs.numBytes);
-    if (overwrite)
-    {
-        pos += specs.numBytes;
-        input.seek(pos, File::Origin::Start);
-    }
-
-    //output second half
-    while (pos < input.getSize())
-    {
-        writeProgress.set(pos);
-        auto chunkSize = getChunkSize(pos, input.getSize());
-        input.read(buffer.get(), chunkSize);
-        output.write(buffer.get(), chunkSize);
-        pos += chunkSize;
-    }
-
-    writeProgress.finish();
-}
-
-/**
- * Computes the checksum of given file.
- * NOTICE: Leaves internal file pointer position intact.
- */
-CRC::Value CRC::computeChecksum(File &input, Progress &progress) const
-{
-    CRC::Value checksum = specs.initialXOR;
-    checksum = computePartialChecksum(
-        input, 0, input.getSize(), checksum, progress);
-
-    if (specs.flags & CRC::Flags::UseFileSize)
-    {
-        auto fileSize = input.getSize();
-        while (fileSize)
-        {
-            checksum = makeNextChecksum(checksum, fileSize);
-            fileSize >>= 8;
-        }
-    }
-    return checksum ^ specs.finalXOR;
-}
-
-/**
- * Computes partial checksum of given file.
- * NOTICE: Leaves internal file pointer position intact.
- */
-CRC::Value CRC::computePartialChecksum(
+CRC::Value CRC::Internals::computePartialChecksum(
     File &input,
     File::OffsetType startPos,
     File::OffsetType endPos,
@@ -193,7 +229,7 @@ CRC::Value CRC::computePartialChecksum(
         auto chunkSize = getChunkSize(pos, endPos);
         input.read(buffer.get(), chunkSize);
         for (size_t i = 0; i < chunkSize; i++)
-            checksum = makeNextChecksum(checksum, buffer[i]);
+            checksum = next(checksum, buffer[i]);
         pos += chunkSize;
     }
 
@@ -202,11 +238,7 @@ CRC::Value CRC::computePartialChecksum(
     return checksum;
 }
 
-/**
- * Computes reverse partial checksum of given file.
- * NOTICE: Leaves internal file pointer position intact.
- */
-CRC::Value CRC::computeReversePartialChecksum(
+CRC::Value CRC::Internals::computeReversePartialChecksum(
     File &input,
     File::OffsetType startPos,
     File::OffsetType endPos,
@@ -231,7 +263,7 @@ CRC::Value CRC::computeReversePartialChecksum(
         input.seek(pos, File::Origin::Start);
         input.read(buffer.get(), chunkSize);
         for (size_t i = 0, j = chunkSize - 1; i < chunkSize; i++, j--)
-            checksum = makePrevChecksum(checksum, buffer[j]);
+            checksum = prev(checksum, buffer[j]);
     }
 
     progress.finish();
@@ -239,7 +271,7 @@ CRC::Value CRC::computeReversePartialChecksum(
     return checksum;
 }
 
-CRC::Value CRC::computePatch(
+CRC::Value CRC::Internals::computePatch(
     CRC::Value targetChecksum,
     File::OffsetType targetPos,
     File &inputFile,
@@ -261,38 +293,35 @@ CRC::Value CRC::computePatch(
         fileSize = swapEndian(fileSize, fileSizeByteCount);
         while (fileSize)
         {
-            targetChecksum = makePrevChecksum(targetChecksum, fileSize);
+            targetChecksum = prev(targetChecksum, fileSize);
             fileSize >>= 8;
         }
     }
 
+    auto posStart = 0;
+    auto posBeforePatch = targetPos;
+    auto posAfterPatch = targetPos + (overwrite ? specs.numBytes : 0);
+    auto posEnd = inputFile.getSize();
+
     CRC::Value checksum1 = computePartialChecksum(
-        inputFile,
-        0,
-        targetPos,
-        specs.initialXOR,
-        progress);
+        inputFile, posStart, posBeforePatch, specs.initialXOR, progress);
 
     CRC::Value checksum2 = computeReversePartialChecksum(
-        inputFile,
-        inputFile.getSize(),
-        targetPos + (overwrite ? specs.numBytes : 0),
-        targetChecksum,
-        progress);
+        inputFile, posEnd, posAfterPatch, targetChecksum, progress);
 
     CRC::Value patch = checksum2;
 
     if (specs.flags & CRC::Flags::BigEndian)
         checksum1 = swapEndian(checksum1, specs.numBytes);
     for (size_t i = 0, j = specs.numBytes - 1; i < specs.numBytes; i++, j--)
-        patch = makePrevChecksum(patch, checksum1 >> (j << 3));
+        patch = prev(patch, checksum1 >> (j << 3));
     if (specs.flags & CRC::Flags::BigEndian)
         patch = swapEndian(patch, specs.numBytes);
 
     return patch;
 }
 
-CRC::Value CRC::makeNextChecksum(CRC::Value prevChecksum, uint8_t c) const
+CRC::Value CRC::Internals::next(CRC::Value prevChecksum, uint8_t c) const
 {
     if (specs.flags & CRC::Flags::BigEndian)
     {
@@ -303,7 +332,7 @@ CRC::Value CRC::makeNextChecksum(CRC::Value prevChecksum, uint8_t c) const
     return (prevChecksum >> 8) ^ lookupTable[index];
 }
 
-CRC::Value CRC::makePrevChecksum(CRC::Value nextChecksum, uint8_t c) const
+CRC::Value CRC::Internals::prev(CRC::Value nextChecksum, uint8_t c) const
 {
     if (specs.flags & CRC::Flags::BigEndian)
     {

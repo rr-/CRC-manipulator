@@ -28,6 +28,11 @@ class File
             Binary = 4
         };
 
+    public:
+        static std::unique_ptr<File> fromFileHandle(FILE *fileHandle);
+        static std::unique_ptr<File> fromFileName(
+            const std::string &fileName, int mode);
+
         ~File();
 
         OffsetType getSize() const;
@@ -38,12 +43,10 @@ class File
         File &write(const char *buffer, size_t size);
         File &write(const unsigned char *buffer, size_t size);
 
-        static std::unique_ptr<File> fromFileHandle(FILE *fileHandle);
-        static std::unique_ptr<File> fromFileName(
-            const std::string &fileName, int mode);
-
     private:
         File(FILE *fileHandle);
+
+    private:
         FILE *fileHandle;
         OffsetType fileSize;
 };

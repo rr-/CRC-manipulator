@@ -31,14 +31,11 @@ class CRC final
             int flags;
         } Specs;
 
-    private:
-        Specs specs;
-        Value lookupTable[256];
-        Value invLookupTable[256];
-
     public:
         CRC(const Specs &specs);
         ~CRC();
+
+        const Specs &getSpecs() const;
 
         Value computeChecksum(File &inputFile, Progress &progress) const;
 
@@ -51,36 +48,9 @@ class CRC final
             Progress &writeProgress,
             Progress &checksumProgress) const;
 
-        const Specs &getSpecs() const;
-
     private:
-        Value computePartialChecksum(
-            File &inputFile,
-            File::OffsetType startPosition,
-            File::OffsetType endPosition,
-            Value initialChecksum,
-            Progress &progress) const;
-
-        Value computeReversePartialChecksum(
-            File &inputFile,
-            File::OffsetType startPosition,
-            File::OffsetType endPosition,
-            Value initialChecksum,
-            Progress &progress) const;
-
-        Value computePatch(
-            Value targetChecksum,
-            File::OffsetType targetPosition,
-            File &inputFile,
-            bool overwrite,
-            Progress &progress) const;
-
-        /**
-         * The following methods calculate new checksums based on
-         * previous checksum value and current input byte.
-         */
-        Value makeNextChecksum(Value checksum, uint8_t c) const;
-        Value makePrevChecksum(Value checksum, uint8_t c) const;
+        struct Internals;
+        std::unique_ptr<Internals> internals;
 };
 
 #endif
