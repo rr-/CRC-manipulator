@@ -1,5 +1,5 @@
 #include "catch.hh"
-#include "lib/CRCFactories.h"
+#include "lib/crc_factories.h"
 #include "test_crc_support.h"
 
 namespace

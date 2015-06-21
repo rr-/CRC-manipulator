@@ -2,7 +2,7 @@
 #define CRC_FACTORIES_H
 #include <memory>
 #include <vector>
-#include "CRC.h"
+#include "crc.h"
 
 std::unique_ptr<CRC> createCRC32();
 std::unique_ptr<CRC> createCRC32POSIX();

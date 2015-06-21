@@ -1,8 +1,8 @@
 #ifndef CRC_H
 #define CRC_H
 #include <functional>
-#include "File.h"
-#include "Progress.h"
+#include "file.h"
+#include "progress.h"
 
 class CRC final
 {

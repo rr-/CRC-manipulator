@@ -3,8 +3,8 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#include "lib/CRCFactories.h"
-#include "lib/File.h"
+#include "lib/crc_factories.h"
+#include "lib/file.h"
 #include "lib/util.h"
 
 namespace

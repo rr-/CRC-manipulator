@@ -1,5 +1,5 @@
 #include "catch.hh"
-#include "lib/File.h"
+#include "lib/file.h"
 
 TEST_CASE("Reading and writing from files works", "[file]")
 {

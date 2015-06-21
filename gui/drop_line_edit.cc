@@ -1,10 +1,9 @@
 #include <QFileInfo>
 #include <QMimeData>
 #include <QUrl>
-#include "gui/droplineedit.h"
+#include "gui/drop_line_edit.h"
 
-DropLineEdit::DropLineEdit(QWidget *parent) :
-    QLineEdit(parent)
+DropLineEdit::DropLineEdit(QWidget *parent) : QLineEdit(parent)
 {
     setAcceptDrops(true);
 }
@@ -35,6 +34,6 @@ void DropLineEdit::dropEvent(QDropEvent *event)
 }
 
 #ifdef WAF
-    #include "gui/droplineedit.moc"
-    #include "gui/droplineedit.cc.moc"
+    #include "gui/drop_line_edit.moc"
+    #include "gui/drop_line_edit.cc.moc"
 #endif

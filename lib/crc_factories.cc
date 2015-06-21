@@ -1,4 +1,4 @@
-#include "CRCFactories.h"
+#include "crc_factories.h"
 
 std::unique_ptr<CRC> createCRC32()
 {

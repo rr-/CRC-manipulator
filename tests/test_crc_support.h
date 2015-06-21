@@ -1,6 +1,6 @@
 #ifndef TEST_CRC_SUPPORT_H
 #define TEST_CRC_SUPPORT_H
-#include "lib/CRC.h"
+#include "lib/crc.h"
 
 void test_computing(const CRC &crc, CRC::Value checksum);
 void test_appending(const CRC &crc, CRC::Value checksum);

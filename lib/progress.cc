@@ -1,4 +1,4 @@
-#include "Progress.h"
+#include "progress.h"
 
 void Progress::start(uint64_t max)
 {

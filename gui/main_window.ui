@@ -110,7 +110,7 @@
   <customwidget>
    <class>DropLineEdit</class>
     <extends>QWidget</extends>
-    <header>droplineedit.h</header>
+    <header>drop_line_edit.h</header>
   </customwidget>
  </customwidgets>
 </ui>

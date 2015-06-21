@@ -3,10 +3,10 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
-#include "gui/mainwindow.h"
-#include "lib/CRCFactories.h"
-#include "lib/File.h"
-#include "ui_mainwindow.h" //auto generated
+#include "gui/main_window.h"
+#include "lib/crc_factories.h"
+#include "lib/file.h"
+#include "ui_main_window.h" //auto generated
 
 namespace
 {
@@ -223,6 +223,6 @@ void MainWindow::workFinished()
 }
 
 #ifdef WAF
-    #include "gui/mainwindow.moc"
-    #include "gui/mainwindow.cc.moc"
+    #include "gui/main_window.moc"
+    #include "gui/main_window.cc.moc"
 #endif

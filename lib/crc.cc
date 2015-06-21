@@ -1,5 +1,5 @@
 #include <cassert>
-#include "CRC.h"
+#include "crc.h"
 
 /**
  * NOTICE: following code is strongly based on SAR-PR-2006-05

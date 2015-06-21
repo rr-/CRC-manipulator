@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <string>
 #include "catch.hh"
-#include "lib/File.h"
+#include "lib/file.h"
 #include "test_crc_support.h"
 
 namespace
