@@ -10,22 +10,25 @@
  */
 typedef uint32_t CRCType;
 
-class CRC
+typedef struct
+{
+    std::string name;
+    size_t numBytes;
+    CRCType polynomial;
+    CRCType initialXOR;
+    CRCType finalXOR;
+} CRCSpecs;
+
+class CRC final
 {
     private:
-        std::string name;
-        size_t numBytes;
-        CRCType polynomial;
-        CRCType polynomialReverse;
-        CRCType initialXOR;
-        CRCType finalXOR;
-
+        CRCSpecs specs;
         CRCType lookupTable[256];
         CRCType invLookupTable[256];
 
     public:
-        CRC();
-        virtual ~CRC();
+        CRC(const CRCSpecs &specs);
+        ~CRC();
 
         CRCType computeChecksum(File &inputFile, Progress &progress) const;
 
@@ -40,13 +43,6 @@ class CRC
 
         size_t getNumBytes() const;
         const std::string &getName() const;
-
-    protected:
-        CRC(const std::string &name,
-            size_t numBytes,
-            CRCType polynomial,
-            CRCType initialXOR,
-            CRCType finalXOR);
 
     private:
         CRCType computePartialChecksum(
@@ -63,7 +59,7 @@ class CRC
             CRCType initialChecksum,
             Progress &progress) const;
 
-        virtual CRCType computePatch(
+        CRCType computePatch(
             CRCType targetChecksum,
             File::OffsetType targetPosition,
             File &inputFile,

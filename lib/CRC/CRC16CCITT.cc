@@ -1,5 +1,0 @@
-#include "CRC/CRC16CCITT.h"
-
-CRC16CCITT::CRC16CCITT() : CRC("CRC16CCITT", 2, 0x1021, 0, 0)
-{
-}

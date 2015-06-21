@@ -1,6 +1,6 @@
 #include <cassert>
 #include <iostream>
-#include "CRC/CRC.h"
+#include "CRC.h"
 
 /**
  * NOTICE: following code is strongly based on SAR-PR-2006-05
@@ -27,24 +27,11 @@ namespace
     }
 }
 
-CRC::CRC()
+CRC::CRC(const CRCSpecs &specs) : specs(specs)
 {
-}
-
-CRC::CRC(
-    const std::string &name,
-    size_t numBytes,
-    CRCType polynomial,
-    CRCType initialXOR,
-    CRCType finalXOR)
-: name(name),
-    numBytes(numBytes),
-    polynomial(polynomial),
-    polynomialReverse(getPolynomialReverse(polynomial, numBytes)),
-    initialXOR(initialXOR),
-    finalXOR(finalXOR)
-{
-    size_t numBits = numBytes * 8;
+    auto polynomialReverse = getPolynomialReverse(
+        specs.polynomial, specs.numBytes);
+    size_t numBits = specs.numBytes * 8;
     auto var1 = numBits - 8;
     auto var2 = 1 << (numBits - 1);
     for (uint16_t n = 0; n <= 0xff; n++)
@@ -74,12 +61,12 @@ CRC::~CRC()
 
 size_t CRC::getNumBytes() const
 {
-    return numBytes;
+    return specs.numBytes;
 }
 
 const std::string &CRC::getName() const
 {
-    return name;
+    return specs.name;
 }
 
 /**
@@ -114,13 +101,13 @@ void CRC::applyPatch(
     }
 
     //output patch
-    assert(numBytes < BufferSize);
-    for (size_t i = 0; i < numBytes; i++)
+    assert(specs.numBytes < BufferSize);
+    for (size_t i = 0; i < specs.numBytes; i++)
         buffer[i] = static_cast<uint8_t>(patch >> (i << 3));
-    output.write(buffer.get(), numBytes);
+    output.write(buffer.get(), specs.numBytes);
     if (overwrite)
     {
-        pos += numBytes;
+        pos += specs.numBytes;
         input.seek(pos, File::Origin::Start);
     }
 
@@ -143,10 +130,10 @@ void CRC::applyPatch(
  */
 CRCType CRC::computeChecksum(File &input, Progress &progress) const
 {
-    CRCType checksum = initialXOR;
+    CRCType checksum = specs.initialXOR;
     checksum = computePartialChecksum(
         input, 0, input.getSize(), checksum, progress);
-    return checksum ^ finalXOR;
+    return checksum ^ specs.finalXOR;
 }
 
 /**
@@ -234,18 +221,18 @@ CRCType CRC::computePatch(
         inputFile,
         0,
         targetPos,
-        initialXOR,
+        specs.initialXOR,
         progress);
 
     CRCType checksum2 = computeReversePartialChecksum(
         inputFile,
         inputFile.getSize(),
-        targetPos + (overwrite ? numBytes : 0),
-        static_cast<CRCType>(targetChecksum ^ finalXOR),
+        targetPos + (overwrite ? specs.numBytes : 0),
+        static_cast<CRCType>(targetChecksum ^ specs.finalXOR),
         progress);
 
     CRCType patch = checksum2;
-    for (size_t i = 0, j = numBytes - 1; i < numBytes; i++, j--)
+    for (size_t i = 0, j = specs.numBytes - 1; i < specs.numBytes; i++, j--)
         patch = makePrevChecksum(patch, (checksum1 >> (j << 3)) & 0xff);
 
     return patch;
@@ -259,6 +246,6 @@ CRCType CRC::makeNextChecksum(CRCType prevChecksum, uint8_t c) const
 
 CRCType CRC::makePrevChecksum(CRCType nextChecksum, uint8_t c) const
 {
-    uint8_t index = nextChecksum >> (numBytes * 8 - 8);
+    uint8_t index = nextChecksum >> (specs.numBytes * 8 - 8);
     return (nextChecksum << 8) ^ invLookupTable[index] ^ c;
 }

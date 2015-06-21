@@ -3,7 +3,7 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
-#include "lib/CRC/CRC32.h"
+#include "lib/CRCFactories.h"
 #include "lib/File.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -148,7 +148,7 @@ void MainWindow::on_patchPushButton_clicked()
     auto inputPath = ui->inputPathLineEdit->text().toStdString();
     auto outputPath = ui->outputPathLineEdit->text().toStdString();
 
-    std::unique_ptr<CRC> crc(new CRC32);
+    std::unique_ptr<CRC> crc(createCRC32());
     std::unique_ptr<File> inputFile;
     std::unique_ptr<File> outputFile;
 

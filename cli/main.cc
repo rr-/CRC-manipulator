@@ -4,24 +4,12 @@
 #include <memory>
 #include <vector>
 
-#include "CRC/CRC.h"
-#include "CRC/CRC16CCITT.h"
-#include "CRC/CRC16IBM.h"
-#include "CRC/CRC32.h"
+#include "CRCFactories.h"
 #include "File.h"
 #include "util.h"
 
 namespace
 {
-    std::vector<std::shared_ptr<CRC>> getAllCrcs()
-    {
-        std::vector<std::shared_ptr<CRC>> crcs;
-        crcs.push_back(std::shared_ptr<CRC>(new CRC32));
-        crcs.push_back(std::shared_ptr<CRC>(new CRC16CCITT));
-        crcs.push_back(std::shared_ptr<CRC>(new CRC16IBM));
-        return crcs;
-    }
-
     void printUsage(std::ostream &s, std::vector<std::shared_ptr<CRC>> crcs)
     {
         s << "CRC manipulator v" << CRCMANIP_VERSION << "\n";
@@ -291,7 +279,7 @@ int main(int argc, char **argv)
     for (int i = 1; i < argc; i++)
         args.push_back(std::string(argv[i]));
 
-    auto crcs = getAllCrcs();
+    auto crcs = createAllCRC();
 
     for (auto &arg : args)
     {

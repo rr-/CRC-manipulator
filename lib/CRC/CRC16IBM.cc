@@ -1,5 +1,0 @@
-#include "CRC/CRC16IBM.h"
-
-CRC16IBM::CRC16IBM() : CRC("CRC16IBM", 2, 0x8005, 0, 0)
-{
-}
