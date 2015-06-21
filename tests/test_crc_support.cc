@@ -4,6 +4,17 @@
 #include "lib/File.h"
 #include "test_crc_support.h"
 
+namespace
+{
+    std::string getTestContent()
+    {
+        std::string result = "";
+        for (size_t i = 0; i < 11411; i ++)
+            result += std::to_string(static_cast<char>(i & 0xFF));
+        return result;
+    }
+}
+
 void test_computing(const CRC &crc, CRCType checksum)
 {
     Progress progress;
@@ -23,7 +34,7 @@ void test_computing(const CRC &crc, CRCType checksum)
 void test_appending(const CRC &crc, CRCType checksum)
 {
     Progress progress;
-    std::string content = "test content";
+    auto content = getTestContent();
 
     {
         auto inFile = File::fromFileName("test-in.txt", File::Mode::Write);
@@ -60,7 +71,7 @@ void test_appending(const CRC &crc, CRCType checksum)
 void test_inserting(const CRC &crc, CRCType checksum)
 {
     Progress progress;
-    std::string content = "test content";
+    auto content = getTestContent();
 
     {
         auto inFile = File::fromFileName("test-in.txt", File::Mode::Write);
@@ -101,7 +112,7 @@ void test_inserting(const CRC &crc, CRCType checksum)
 void test_overwriting(const CRC &crc, CRCType checksum)
 {
     Progress progress;
-    std::string content = "test content";
+    auto content = getTestContent();
 
     {
         auto inFile = File::fromFileName("test-in.txt", File::Mode::Write);

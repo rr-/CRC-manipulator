@@ -1,5 +1,4 @@
 #include <cassert>
-#include <iostream>
 #include "CRC.h"
 
 /**
@@ -25,33 +24,58 @@ namespace
             rev |= !!(polynomial & (1 << i)) << (numBits - 1 - i);
         return rev;
     }
+
+    CRCType swapEndian(CRCType crc, size_t crcSize)
+    {
+        CRCType result = 0;
+        for (size_t i = 0; i < crcSize; i++)
+        {
+            result <<= 8;
+            result |= crc & 0xff;
+            crc >>= 8;
+        }
+        return result;
+    }
 }
 
 CRC::CRC(const CRCSpecs &specs) : specs(specs)
 {
-    auto polynomialReverse = getPolynomialReverse(
-        specs.polynomial, specs.numBytes);
+    auto poly = specs.polynomial;
+    auto polyRev = getPolynomialReverse(poly, specs.numBytes);
+
     size_t numBits = specs.numBytes * 8;
-    auto var1 = numBits - 8;
-    auto var2 = 1 << (numBits - 1);
+    auto mask = 1 << (numBits - 1);
     for (uint16_t n = 0; n <= 0xff; n++)
     {
-        CRCType crc1 = n;
-        CRCType crc2 = n << var1;
+        CRCType t[2] = { n, n };
+        t[!(specs.flags & CRCFlags::BigEndian)] = swapEndian(n, specs.numBytes);
         for (uint8_t k = 0; k < 8; k++)
         {
-            if (crc1 & 1)
-                crc1 = (crc1 >> 1) ^ polynomialReverse;
-            else
-                crc1 >>= 1;
+            if (specs.flags & CRCFlags::BigEndian)
+            {
+                t[0] = t[0] & mask
+                    ? (t[0] << 1) ^ poly
+                    : (t[0] << 1);
 
-            if (crc2 & var2)
-                crc2 = ((crc2 ^ polynomialReverse) << 1) | 1;
+                t[1] = t[1] & 1
+                    ? ((t[1] ^ poly) >> 1) | mask
+                    : (t[1] >> 1);
+            }
             else
-                crc2 <<= 1;
+            {
+                t[0] = t[0] & 1
+                    ? (t[0] >> 1) ^ polyRev
+                    : (t[0] >> 1);
+
+                t[1] = t[1] & mask
+                    ? ((t[1] ^ polyRev) << 1) | 1
+                    : (t[1] << 1);
+            }
         }
-        lookupTable[n] = crc1;
-        invLookupTable[n] = crc2;
+        if (specs.flags & CRCFlags::BigEndian)
+            t[1] ^= swapEndian(n, specs.numBytes);
+        lookupTable[n] = t[0];
+        invLookupTable[n] = t[1];
     }
 }
 
@@ -128,6 +152,16 @@ CRCType CRC::computeChecksum(File &input, Progress &progress) const
     CRCType checksum = specs.initialXOR;
     checksum = computePartialChecksum(
         input, 0, input.getSize(), checksum, progress);
+
+    if (specs.flags & CRCFlags::UseFileSize)
+    {
+        auto fileSize = input.getSize();
+        while (fileSize)
+        {
+            checksum = makeNextChecksum(checksum, fileSize);
+            fileSize >>= 8;
+        }
+    }
     return checksum ^ specs.finalXOR;
 }
 
@@ -212,6 +246,26 @@ CRCType CRC::computePatch(
     bool overwrite,
     Progress &progress) const
 {
+    targetChecksum ^= specs.finalXOR;
+
+    if (specs.flags & CRCFlags::UseFileSize)
+    {
+        auto fileSize = inputFile.getSize() + (overwrite ? 0 : specs.numBytes);
+        auto fileSizeCopy = fileSize;
+        auto fileSizeByteCount = 0;
+        while (fileSizeCopy)
+        {
+            fileSizeByteCount ++;
+            fileSizeCopy >>= 8;
+        }
+        fileSize = swapEndian(fileSize, fileSizeByteCount);
+        while (fileSize)
+        {
+            targetChecksum = makePrevChecksum(targetChecksum, fileSize);
+            fileSize >>= 8;
+        }
+    }
+
     CRCType checksum1 = computePartialChecksum(
         inputFile,
         0,
@@ -223,24 +277,41 @@ CRCType CRC::computePatch(
         inputFile,
         inputFile.getSize(),
         targetPos + (overwrite ? specs.numBytes : 0),
-        static_cast<CRCType>(targetChecksum ^ specs.finalXOR),
+        targetChecksum,
         progress);
 
     CRCType patch = checksum2;
+
+    if (specs.flags & CRCFlags::BigEndian)
+        checksum1 = swapEndian(checksum1, specs.numBytes);
     for (size_t i = 0, j = specs.numBytes - 1; i < specs.numBytes; i++, j--)
-        patch = makePrevChecksum(patch, (checksum1 >> (j << 3)) & 0xff);
+        patch = makePrevChecksum(patch, checksum1 >> (j << 3));
+    if (specs.flags & CRCFlags::BigEndian)
+        patch = swapEndian(patch, specs.numBytes);
 
     return patch;
 }
 
 CRCType CRC::makeNextChecksum(CRCType prevChecksum, uint8_t c) const
 {
+    if (specs.flags & CRCFlags::BigEndian)
+    {
+        uint8_t index = (prevChecksum >> (specs.numBytes * 8 - 8)) ^ c;
+        return (prevChecksum << 8) ^ lookupTable[index];
+    }
     uint8_t index = prevChecksum ^ c;
     return (prevChecksum >> 8) ^ lookupTable[index];
 }
 
 CRCType CRC::makePrevChecksum(CRCType nextChecksum, uint8_t c) const
 {
+    if (specs.flags & CRCFlags::BigEndian)
+    {
+        uint8_t index = nextChecksum;
+        return (c << (specs.numBytes * 8 - 8))
+            ^ invLookupTable[index]
+            ^ (nextChecksum << (specs.numBytes * 8 - 8)) ^ (nextChecksum >> 8);
+    }
     uint8_t index = nextChecksum >> (specs.numBytes * 8 - 8);
     return (nextChecksum << 8) ^ invLookupTable[index] ^ c;
 }

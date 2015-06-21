@@ -10,6 +10,12 @@
  */
 typedef uint32_t CRCType;
 
+enum CRCFlags
+{
+    BigEndian   = 1,
+    UseFileSize = 2,
+};
+
 typedef struct
 {
     std::string name;
@@ -18,6 +24,7 @@ typedef struct
     CRCType initialXOR;
     CRCType finalXOR;
     CRCType test;
+    int flags;
 } CRCSpecs;
 
 class CRC final

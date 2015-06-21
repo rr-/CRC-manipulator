@@ -12,6 +12,19 @@ std::unique_ptr<CRC> createCRC32()
     return std::unique_ptr<CRC>(new CRC(specs));
 }
 
+std::unique_ptr<CRC> createCRC32POSIX()
+{
+    CRCSpecs specs   = {};
+    specs.name       = "CRC32POSIX";
+    specs.numBytes   = 4;
+    specs.polynomial = 0x04C11DB7;
+    specs.initialXOR = 0x00000000;
+    specs.finalXOR   = 0xFFFFFFFF;
+    specs.flags      = CRCFlags::BigEndian | CRCFlags::UseFileSize;
+    specs.test       = 0x377A6011;
+    return std::unique_ptr<CRC>(new CRC(specs));
+}
+
 std::unique_ptr<CRC> createCRC16CCITT()
 {
     CRCSpecs specs   = {};
@@ -40,6 +53,7 @@ std::vector<std::shared_ptr<CRC>> createAllCRC()
 {
     std::vector<std::shared_ptr<CRC>> crcs;
     crcs.push_back(createCRC32());
+    crcs.push_back(createCRC32POSIX());
     crcs.push_back(createCRC16CCITT());
     crcs.push_back(createCRC16IBM());
     return crcs;
