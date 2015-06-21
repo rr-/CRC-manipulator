@@ -51,7 +51,7 @@ void test_appending(const CRC &crc, CRCType checksum)
         std::unique_ptr<char[]> buf(new char[size1]);
         inFile->seek(0, File::Origin::Start);
         inFile->read(buf.get(), size1);
-        REQUIRE(std::string(buf.get()) == content);
+        REQUIRE(std::string(buf.get(), size1) == content.substr(0, size1));
         std::remove("test-in.txt");
         std::remove("test-out.txt");
     }
