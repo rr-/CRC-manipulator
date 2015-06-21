@@ -4,44 +4,46 @@
 #include "File.h"
 #include "Progress.h"
 
-/**
- * Just make it enough to hold any derived CRC.
- * Templates would be real PITA since no abstract pointers would be possible.
- */
-typedef uint32_t CRCType;
-
-enum CRCFlags
-{
-    BigEndian   = 1,
-    UseFileSize = 2,
-};
-
-typedef struct
-{
-    std::string name;
-    size_t numBytes;
-    CRCType polynomial;
-    CRCType initialXOR;
-    CRCType finalXOR;
-    CRCType test;
-    int flags;
-} CRCSpecs;
-
 class CRC final
 {
+    public:
+        /**
+         * Rather than using templates, we're making sure CRC type is big
+         * enough to hold any possible value. Because of this, one can
+         * conveniently reference any kind of CRC without knowing its size.
+         */
+        typedef uint32_t Value;
+
+        enum Flags
+        {
+            BigEndian   = 1,
+            UseFileSize = 2,
+        };
+
+        typedef struct
+        {
+            std::string name;
+            size_t numBytes;
+            Value polynomial;
+            Value initialXOR;
+            Value finalXOR;
+            Value test;
+            int flags;
+        } Specs;
+
     private:
-        CRCSpecs specs;
-        CRCType lookupTable[256];
-        CRCType invLookupTable[256];
+        Specs specs;
+        Value lookupTable[256];
+        Value invLookupTable[256];
 
     public:
-        CRC(const CRCSpecs &specs);
+        CRC(const Specs &specs);
         ~CRC();
 
-        CRCType computeChecksum(File &inputFile, Progress &progress) const;
+        Value computeChecksum(File &inputFile, Progress &progress) const;
 
         void applyPatch(
-            CRCType targetChecksum,
+            Value targetChecksum,
             File::OffsetType targetPosition,
             File &inputFile,
             File &outputFile,
@@ -49,25 +51,25 @@ class CRC final
             Progress &writeProgress,
             Progress &checksumProgress) const;
 
-        const CRCSpecs &getSpecs() const;
+        const Specs &getSpecs() const;
 
     private:
-        CRCType computePartialChecksum(
+        Value computePartialChecksum(
             File &inputFile,
             File::OffsetType startPosition,
             File::OffsetType endPosition,
-            CRCType initialChecksum,
+            Value initialChecksum,
             Progress &progress) const;
 
-        CRCType computeReversePartialChecksum(
+        Value computeReversePartialChecksum(
             File &inputFile,
             File::OffsetType startPosition,
             File::OffsetType endPosition,
-            CRCType initialChecksum,
+            Value initialChecksum,
             Progress &progress) const;
 
-        CRCType computePatch(
-            CRCType targetChecksum,
+        Value computePatch(
+            Value targetChecksum,
             File::OffsetType targetPosition,
             File &inputFile,
             bool overwrite,
@@ -77,8 +79,8 @@ class CRC final
          * The following methods calculate new checksums based on
          * previous checksum value and current input byte.
          */
-        CRCType makeNextChecksum(CRCType checksum, uint8_t c) const;
-        CRCType makePrevChecksum(CRCType checksum, uint8_t c) const;
+        Value makeNextChecksum(Value checksum, uint8_t c) const;
+        Value makePrevChecksum(Value checksum, uint8_t c) const;
 };
 
 #endif

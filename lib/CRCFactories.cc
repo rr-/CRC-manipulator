@@ -2,7 +2,7 @@
 
 std::unique_ptr<CRC> createCRC32()
 {
-    CRCSpecs specs   = {};
+    CRC::Specs specs = {};
     specs.name       = "CRC32";
     specs.numBytes   = 4;
     specs.polynomial = 0x04C11DB7;
@@ -14,20 +14,20 @@ std::unique_ptr<CRC> createCRC32()
 
 std::unique_ptr<CRC> createCRC32POSIX()
 {
-    CRCSpecs specs   = {};
+    CRC::Specs specs = {};
     specs.name       = "CRC32POSIX";
     specs.numBytes   = 4;
     specs.polynomial = 0x04C11DB7;
     specs.initialXOR = 0x00000000;
     specs.finalXOR   = 0xFFFFFFFF;
-    specs.flags      = CRCFlags::BigEndian | CRCFlags::UseFileSize;
+    specs.flags      = CRC::Flags::BigEndian | CRC::Flags::UseFileSize;
     specs.test       = 0x377A6011;
     return std::unique_ptr<CRC>(new CRC(specs));
 }
 
 std::unique_ptr<CRC> createCRC16CCITT()
 {
-    CRCSpecs specs   = {};
+    CRC::Specs specs = {};
     specs.name       = "CRC16CCITT";
     specs.numBytes   = 2;
     specs.polynomial = 0x1021;
@@ -39,7 +39,7 @@ std::unique_ptr<CRC> createCRC16CCITT()
 
 std::unique_ptr<CRC> createCRC16IBM()
 {
-    CRCSpecs specs   = {};
+    CRC::Specs specs = {};
     specs.name       = "CRC16IBM";
     specs.numBytes   = 2;
     specs.polynomial = 0x8005;

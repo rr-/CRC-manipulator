@@ -4,7 +4,7 @@
 
 namespace
 {
-    CRCType getTestChecksum(size_t numBytes)
+    CRC::Value getTestChecksum(size_t numBytes)
     {
         return 0xDECEA5ED & (0xFFFFFFFFUL >> (32 - (numBytes << 3)));
     }

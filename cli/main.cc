@@ -163,7 +163,7 @@ Examples:
             std::shared_ptr<CRC> crc;
             std::unique_ptr<File> inputFile;
             std::unique_ptr<File> outputFile;
-            CRCType checksum;
+            CRC::Value checksum;
             File::OffsetType position;
             bool positionSupplied;
             bool overwrite;

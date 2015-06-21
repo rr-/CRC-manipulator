@@ -16,18 +16,18 @@ namespace
         return BufferSize;
     }
 
-    CRCType getPolynomialReverse(CRCType polynomial, size_t numBytes)
+    CRC::Value getPolynomialReverse(CRC::Value polynomial, size_t numBytes)
     {
-        CRCType rev = 0;
+        CRC::Value rev = 0;
         size_t numBits = numBytes * 8;
         for (size_t i = 0; i < numBits; i++)
             rev |= !!(polynomial & (1 << i)) << (numBits - 1 - i);
         return rev;
     }
 
-    CRCType swapEndian(CRCType crc, size_t crcSize)
+    CRC::Value swapEndian(CRC::Value crc, size_t crcSize)
     {
-        CRCType result = 0;
+        CRC::Value result = 0;
         for (size_t i = 0; i < crcSize; i++)
         {
             result <<= 8;
@@ -38,20 +38,20 @@ namespace
     }
 }
 
-CRC::CRC(const CRCSpecs &specs) : specs(specs)
+CRC::CRC(const CRC::Specs &specs) : specs(specs)
 {
     auto poly = specs.polynomial;
     auto polyRev = getPolynomialReverse(poly, specs.numBytes);
-
+    bool bigEndian = specs.flags & CRC::Flags::BigEndian;
     size_t numBits = specs.numBytes * 8;
     auto mask = 1 << (numBits - 1);
     for (uint16_t n = 0; n <= 0xff; n++)
     {
-        CRCType t[2] = { n, n };
-        t[!(specs.flags & CRCFlags::BigEndian)] = swapEndian(n, specs.numBytes);
+        CRC::Value t[2] = { n, n };
+        t[!bigEndian] = swapEndian(n, specs.numBytes);
         for (uint8_t k = 0; k < 8; k++)
         {
-            if (specs.flags & CRCFlags::BigEndian)
+            if (bigEndian)
             {
                 t[0] = t[0] & mask
                     ? (t[0] << 1) ^ poly
@@ -72,7 +72,7 @@ CRC::CRC(const CRCSpecs &specs) : specs(specs)
                     : (t[1] << 1);
             }
         }
-        if (specs.flags & CRCFlags::BigEndian)
+        if (bigEndian)
             t[1] ^= swapEndian(n, specs.numBytes);
         lookupTable[n] = t[0];
         invLookupTable[n] = t[1];
@@ -83,7 +83,7 @@ CRC::~CRC()
 {
 }
 
-const CRCSpecs &CRC::getSpecs() const
+const CRC::Specs &CRC::getSpecs() const
 {
     return specs;
 }
@@ -93,7 +93,7 @@ const CRCSpecs &CRC::getSpecs() const
  * computed patch at given position along the way.
  */
 void CRC::applyPatch(
-    CRCType finalChecksum,
+    CRC::Value finalChecksum,
     File::OffsetType targetPos,
     File &input,
     File &output,
@@ -102,7 +102,7 @@ void CRC::applyPatch(
     Progress &checksumProgress) const
 {
     std::unique_ptr<uint8_t[]> buffer(new uint8_t[BufferSize]);
-    CRCType patch = computePatch(
+    CRC::Value patch = computePatch(
         finalChecksum, targetPos, input, overwrite, checksumProgress);
 
     input.seek(0, File::Origin::Start);
@@ -147,13 +147,13 @@ void CRC::applyPatch(
  * Computes the checksum of given file.
  * NOTICE: Leaves internal file pointer position intact.
  */
-CRCType CRC::computeChecksum(File &input, Progress &progress) const
+CRC::Value CRC::computeChecksum(File &input, Progress &progress) const
 {
-    CRCType checksum = specs.initialXOR;
+    CRC::Value checksum = specs.initialXOR;
     checksum = computePartialChecksum(
         input, 0, input.getSize(), checksum, progress);
 
-    if (specs.flags & CRCFlags::UseFileSize)
+    if (specs.flags & CRC::Flags::UseFileSize)
     {
         auto fileSize = input.getSize();
         while (fileSize)
@@ -169,18 +169,18 @@ CRCType CRC::computeChecksum(File &input, Progress &progress) const
  * Computes partial checksum of given file.
  * NOTICE: Leaves internal file pointer position intact.
  */
-CRCType CRC::computePartialChecksum(
+CRC::Value CRC::computePartialChecksum(
     File &input,
     File::OffsetType startPos,
     File::OffsetType endPos,
-    CRCType initialChecksum,
+    CRC::Value initialChecksum,
     Progress &progress) const
 {
     assert(startPos <= endPos);
     if (startPos == endPos)
         return initialChecksum;
 
-    CRCType checksum = initialChecksum;
+    CRC::Value checksum = initialChecksum;
     std::unique_ptr<uint8_t[]> buffer(new uint8_t[BufferSize]);
     File::OffsetType oldPos = input.tell();
     File::OffsetType pos = startPos;
@@ -206,18 +206,18 @@ CRCType CRC::computePartialChecksum(
  * Computes reverse partial checksum of given file.
  * NOTICE: Leaves internal file pointer position intact.
  */
-CRCType CRC::computeReversePartialChecksum(
+CRC::Value CRC::computeReversePartialChecksum(
     File &input,
     File::OffsetType startPos,
     File::OffsetType endPos,
-    CRCType initialChecksum,
+    CRC::Value initialChecksum,
     Progress &progress) const
 {
     assert(startPos >= endPos);
     if (startPos == endPos)
         return initialChecksum;
 
-    CRCType checksum = initialChecksum;
+    CRC::Value checksum = initialChecksum;
     std::unique_ptr<uint8_t[]> buffer(new uint8_t[BufferSize]);
     File::OffsetType oldPos = input.tell();
     File::OffsetType pos = startPos;
@@ -239,8 +239,8 @@ CRCType CRC::computeReversePartialChecksum(
     return checksum;
 }
 
-CRCType CRC::computePatch(
-    CRCType targetChecksum,
+CRC::Value CRC::computePatch(
+    CRC::Value targetChecksum,
     File::OffsetType targetPos,
     File &inputFile,
     bool overwrite,
@@ -248,7 +248,7 @@ CRCType CRC::computePatch(
 {
     targetChecksum ^= specs.finalXOR;
 
-    if (specs.flags & CRCFlags::UseFileSize)
+    if (specs.flags & CRC::Flags::UseFileSize)
     {
         auto fileSize = inputFile.getSize() + (overwrite ? 0 : specs.numBytes);
         auto fileSizeCopy = fileSize;
@@ -266,35 +266,35 @@ CRCType CRC::computePatch(
         }
     }
 
-    CRCType checksum1 = computePartialChecksum(
+    CRC::Value checksum1 = computePartialChecksum(
         inputFile,
         0,
         targetPos,
         specs.initialXOR,
         progress);
 
-    CRCType checksum2 = computeReversePartialChecksum(
+    CRC::Value checksum2 = computeReversePartialChecksum(
         inputFile,
         inputFile.getSize(),
         targetPos + (overwrite ? specs.numBytes : 0),
         targetChecksum,
         progress);
 
-    CRCType patch = checksum2;
+    CRC::Value patch = checksum2;
 
-    if (specs.flags & CRCFlags::BigEndian)
+    if (specs.flags & CRC::Flags::BigEndian)
         checksum1 = swapEndian(checksum1, specs.numBytes);
     for (size_t i = 0, j = specs.numBytes - 1; i < specs.numBytes; i++, j--)
         patch = makePrevChecksum(patch, checksum1 >> (j << 3));
-    if (specs.flags & CRCFlags::BigEndian)
+    if (specs.flags & CRC::Flags::BigEndian)
         patch = swapEndian(patch, specs.numBytes);
 
     return patch;
 }
 
-CRCType CRC::makeNextChecksum(CRCType prevChecksum, uint8_t c) const
+CRC::Value CRC::makeNextChecksum(CRC::Value prevChecksum, uint8_t c) const
 {
-    if (specs.flags & CRCFlags::BigEndian)
+    if (specs.flags & CRC::Flags::BigEndian)
     {
         uint8_t index = (prevChecksum >> (specs.numBytes * 8 - 8)) ^ c;
         return (prevChecksum << 8) ^ lookupTable[index];
@@ -303,9 +303,9 @@ CRCType CRC::makeNextChecksum(CRCType prevChecksum, uint8_t c) const
     return (prevChecksum >> 8) ^ lookupTable[index];
 }
 
-CRCType CRC::makePrevChecksum(CRCType nextChecksum, uint8_t c) const
+CRC::Value CRC::makePrevChecksum(CRC::Value nextChecksum, uint8_t c) const
 {
-    if (specs.flags & CRCFlags::BigEndian)
+    if (specs.flags & CRC::Flags::BigEndian)
     {
         uint8_t index = nextChecksum;
         return (c << (specs.numBytes * 8 - 8))
