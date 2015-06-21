@@ -43,7 +43,7 @@ Available algorithms:
         {
             std::cout
                 << "* "
-                << crc->getName()
+                << crc->getSpecs().name
                 << (isDefault ? " (default)" : "")
                 << "\n";
             isDefault = false;
@@ -59,19 +59,20 @@ Examples:
 
     void validateChecksum(CRC &crc, const std::string &str)
     {
-        if (str.length() > crc.getNumBytes() * 2)
+        size_t expectedDigits = crc.getSpecs().numBytes * 2;
+        if (str.length() > expectedDigits)
         {
             throw std::runtime_error(
                 "Error: Specified checksum has more than "
-                + std::to_string(crc.getNumBytes() * 2)
+                + std::to_string(expectedDigits)
                 + " digits.");
         }
 
-        if (str.length() < crc.getNumBytes() * 2)
+        if (str.length() < expectedDigits)
         {
             std::cerr
                 << "Warning: specified checksum has less than "
-                << crc.getNumBytes() * 2
+                << expectedDigits
                 << " digits. Resulting checksum will be padded with 0.\n";
         }
 
@@ -132,7 +133,7 @@ Examples:
                 auto algo  = args[++i];
                 auto it = std::find_if(
                     crcs.begin(), crcs.end(), [&](std::shared_ptr<CRC> crc)
-                    { return crc->getName() == algo; });
+                    { return crc->getSpecs().name == algo; });
                 if (it == crcs.end())
                     throw std::runtime_error("Unknown algorithm: " + algo);
                 crc = *it;
@@ -146,7 +147,7 @@ Examples:
         auto checksum = crc->computeChecksum(*inputFile, dummyProgress);
         std::cout
             << std::hex
-            << std::setw(crc->getNumBytes() * 2)
+            << std::setw(crc->getSpecs().numBytes * 2)
             << std::setfill('0')
             << checksum
             << std::endl;
@@ -218,7 +219,7 @@ Examples:
                 auto algo  = args[++i];
                 auto it = std::find_if(
                     crcs.begin(), crcs.end(), [&](std::shared_ptr<CRC> crc)
-                    { return crc->getName() == algo; });
+                    { return crc->getSpecs().name == algo; });
                 if (it == crcs.end())
                     throw std::runtime_error("Unknown algorithm: " + algo);
                 crc = *it;
@@ -255,11 +256,11 @@ Examples:
             ? shiftUserPosition(
                 position,
                 inputFile->getSize(),
-                crc->getNumBytes(),
+                crc->getSpecs().numBytes,
                 overwrite)
             : computeAutoPosition(
                 inputFile->getSize(),
-                crc->getNumBytes(),
+                crc->getSpecs().numBytes,
                 overwrite);
 
         crc->applyPatch(

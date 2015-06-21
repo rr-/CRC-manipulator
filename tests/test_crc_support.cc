@@ -32,7 +32,7 @@ void test_appending(const CRC &crc, CRCType checksum)
     }
 
     auto size1 = content.size();
-    auto size2 = size1 + crc.getNumBytes();
+    auto size2 = size1 + crc.getSpecs().numBytes;
     {
         auto inFile = File::fromFileName(
             "test-in.txt", File::Mode::Read | File::Mode::Binary);
@@ -69,8 +69,8 @@ void test_inserting(const CRC &crc, CRCType checksum)
     }
 
     size_t offset1 = content.size() / 2;
-    size_t offset2 = offset1 + crc.getNumBytes();
-    size_t size = content.size() + crc.getNumBytes();
+    size_t offset2 = offset1 + crc.getSpecs().numBytes;
+    size_t size = content.size() + crc.getSpecs().numBytes;
 
     {
         auto inFile = File::fromFileName(
@@ -109,7 +109,7 @@ void test_overwriting(const CRC &crc, CRCType checksum)
         REQUIRE(inFile->getSize() == content.size());
     }
 
-    size_t offset = content.size() - crc.getNumBytes();
+    size_t offset = content.size() - crc.getSpecs().numBytes;
 
     {
         auto inFile = File::fromFileName(

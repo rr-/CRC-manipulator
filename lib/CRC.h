@@ -41,8 +41,7 @@ class CRC final
             Progress &writeProgress,
             Progress &checksumProgress) const;
 
-        size_t getNumBytes() const;
-        const std::string &getName() const;
+        const CRCSpecs &getSpecs() const;
 
     private:
         CRCType computePartialChecksum(

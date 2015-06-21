@@ -59,14 +59,9 @@ CRC::~CRC()
 {
 }
 
-size_t CRC::getNumBytes() const
+const CRCSpecs &CRC::getSpecs() const
 {
-    return specs.numBytes;
-}
-
-const std::string &CRC::getName() const
-{
-    return specs.name;
+    return specs;
 }
 
 /**
