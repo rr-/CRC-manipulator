@@ -385,7 +385,7 @@ int main(int argc, char **argv)
         }
         catch (arg_error &e)
         {
-            std::cerr << e.what() << "\n";
+            std::cerr << e.what() << "\n\n";
             printUsage(std::cerr, crcs);
             return 1;
         }
