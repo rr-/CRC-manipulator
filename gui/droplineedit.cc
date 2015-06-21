@@ -1,7 +1,7 @@
+#include <QFileInfo>
 #include <QMimeData>
 #include <QUrl>
-#include <QFileInfo>
-#include "droplineedit.h"
+#include "gui/droplineedit.h"
 
 DropLineEdit::DropLineEdit(QWidget *parent) :
     QLineEdit(parent)

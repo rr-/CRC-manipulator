@@ -1,5 +1,5 @@
 #include "catch.hh"
-#include "util.h"
+#include "lib/util.h"
 
 TEST_CASE("Automatic patch insertion position works", "[pos]")
 {

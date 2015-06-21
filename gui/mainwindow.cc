@@ -3,10 +3,10 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
+#include "gui/mainwindow.h"
 #include "lib/CRCFactories.h"
 #include "lib/File.h"
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "ui_mainwindow.h" //auto generated
 
 namespace
 {

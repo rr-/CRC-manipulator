@@ -3,10 +3,9 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-
-#include "CRCFactories.h"
-#include "File.h"
-#include "util.h"
+#include "lib/CRCFactories.h"
+#include "lib/File.h"
+#include "lib/util.h"
 
 namespace
 {

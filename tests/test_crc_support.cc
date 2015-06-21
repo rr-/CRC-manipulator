@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <string>
-#include "File.h"
 #include "catch.hh"
+#include "lib/File.h"
 #include "test_crc_support.h"
 
 void test_computing(const CRC &crc, CRCType checksum)

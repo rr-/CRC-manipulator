@@ -102,21 +102,18 @@ def build(ctx):
     ctx.objects(
         source   = lib_sources,
         target   = 'common',
-        cxxflags = ['-iquote', lib_path],
         includes = ['.'])
 
     ctx.program(
         source   = cli_sources,
         target   = 'crcmanip-cli',
         includes = ['.'],
-        cxxflags = ['-iquote', cli_path, '-iquote', lib_path],
         use      = [ 'common' ])
 
     ctx.program(
         source   = tests_sources,
         target   = 'crcmanip-tests',
         includes = ['.'],
-        cxxflags = ['-iquote', tests_path, '-iquote', lib_path],
         use      = [ 'common' ])
 
     if getattr(ctx.env, 'HAVE_QTCORE', False):
@@ -124,7 +121,7 @@ def build(ctx):
             source    = gui_sources,
             target    = 'crcmanip-gui',
             includes  = [ '.' ],
-            cxxflags  = ['-iquote', gui_path, '-iquote', lib_path],
+            cxxflags  = ['-iquote', gui_path ],
             linkflags = [ '-Wl,-subsystem,windows' if ctx.env.DEST_OS == 'win32' else '' ],
             defines   = [ 'WAF' ],
             features  = [ 'qt4' ],

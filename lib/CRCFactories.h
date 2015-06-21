@@ -1,5 +1,5 @@
-#ifndef CRC_IMPL_H
-#define CRC_IMPL_H
+#ifndef CRC_FACTORIES_H
+#define CRC_FACTORIES_H
 #include <memory>
 #include <vector>
 #include "CRC.h"

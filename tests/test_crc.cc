@@ -1,5 +1,5 @@
-#include "CRCFactories.h"
 #include "catch.hh"
+#include "lib/CRCFactories.h"
 #include "test_crc_support.h"
 
 TEST_CASE("CRC computing works", "[crc]")

@@ -1,5 +1,5 @@
-#ifndef CLI_UTIL_H
-#define CLI_UTIL_H
+#ifndef UTIL_H
+#define UTIL_H
 #include "File.h"
 
 File::OffsetType computeAutoPosition(
