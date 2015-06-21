@@ -82,9 +82,9 @@ Available ALG aglorithms:
                 maxNameSize = crc->getSpecs().name.size();
 
         std::ios oldState(nullptr);
-        oldState.copyfmt(std::cout);
+        oldState.copyfmt(s);
 
-        std::cout << "  "
+        s << "  "
             << std::setw(maxNameSize) << std::left << "Name"
             << " | " << std::setw(8) << std::left << "polynom."
             << "  " << std::setw(8) << std::left << "init XOR"
@@ -97,9 +97,8 @@ Available ALG aglorithms:
         {
             const auto &specs = crc->getSpecs();
             auto fill = std::string(maxChecksumSize - specs.numBytes * 2, ' ');
-            std::cout.copyfmt(oldState);
-            std::cout
-                << "  "
+            s.copyfmt(oldState);
+            s << "  "
                 << std::setw(maxNameSize) << std::left << crc->getSpecs().name
                 << " | " << fill << hex(specs.polynomial, specs.numBytes * 2)
                 << "  " << fill << hex(specs.initialXOR, specs.numBytes * 2)
@@ -111,7 +110,7 @@ Available ALG aglorithms:
             isDefault = false;
         }
 
-        std::cout.copyfmt(oldState);
+        s.copyfmt(oldState);
 
         s << R"(
 Flag legend:
