@@ -92,7 +92,7 @@ File &File::seek(OffsetType offset, Origin origin)
         auto ret = fseek(fileHandle, destination, type);
     #endif
     if (ret != 0)
-        throw std::runtime_error("Failed to seek file");
+        throw std::runtime_error("Stream is unseekable");
     return *this;
 }
 

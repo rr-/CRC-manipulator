@@ -63,13 +63,13 @@ def configure_features(ctx):
         ctx.check_cxx(
             msg = 'Checking for ' + f + ' support',
             fragment = "#include <cstdio>\nint main(){" + f + '(0, 0, 0); }',
-            define_name = f.strip('_').upper(),
+            define_name = 'HAVE_' + f.strip('_').upper(),
             mandatory = False)
 
     ctx.check_cxx(
         msg = 'Checking for off64_t support',
         fragment = "#include <cstdio>\nint main(){off64_t x=0;}",
-        define_name = 'OFF64T',
+        define_name = 'HAVE_OFF64T',
         mandatory = False)
 
 def configure(ctx):
