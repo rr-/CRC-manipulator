@@ -9,6 +9,12 @@
 
 namespace
 {
+    class arg_error : public std::logic_error
+    {
+        public:
+            arg_error(const std::string &msg) : std::logic_error(msg) { }
+    };
+
     class hex
     {
         public:
@@ -125,7 +131,7 @@ Examples:
         size_t expectedDigits = crc.getSpecs().numBytes * 2;
         if (str.length() > expectedDigits)
         {
-            throw std::runtime_error(
+            throw arg_error(
                 "Error: Specified checksum has more than "
                 + std::to_string(expectedDigits)
                 + " digits.");
@@ -144,7 +150,7 @@ Examples:
         {
             if (allowedCharacters.find(c) == std::string::npos)
             {
-                throw std::runtime_error(
+                throw arg_error(
                     "Error: Specified checksum contains invalid characters.\n"
                     "Only hexadecimal values are accepted.\n");
             }
@@ -182,7 +188,7 @@ Examples:
         crc = crcs[0];
 
         if (args.size() < 1)
-            throw std::runtime_error("No input file specified.");
+            throw arg_error("No input file specified.");
         inputFile = File::fromFileName(
             args[0], File::Mode::Read | File::Mode::Binary);
 
@@ -192,13 +198,13 @@ Examples:
             if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
             {
                 if (i == args.size() - 1)
-                    throw std::runtime_error(arg + " needs a parameter.");
+                    throw arg_error(arg + " needs a parameter.");
                 auto algo  = args[++i];
                 auto it = std::find_if(
                     crcs.begin(), crcs.end(), [&](std::shared_ptr<CRC> crc)
                     { return crc->getSpecs().name == algo; });
                 if (it == crcs.end())
-                    throw std::runtime_error("Unknown algorithm: " + algo);
+                    throw arg_error("Unknown algorithm: " + algo);
                 crc = *it;
             }
         }
@@ -243,17 +249,17 @@ Examples:
         overwrite = false;
 
         if (args.size() < 1)
-            throw std::runtime_error("No input file specified.");
+            throw arg_error("No input file specified.");
         inputFile = File::fromFileName(
             args[0], File::Mode::Read | File::Mode::Binary);
 
         if (args.size() < 2)
-            throw std::runtime_error("No output file specified.");
+            throw arg_error("No output file specified.");
         outputFile = File::fromFileName(
             args[1], File::Mode::Write | File::Mode::Binary);
 
         if (args.size() < 3)
-            throw std::runtime_error("No checksum specified.");
+            throw arg_error("No checksum specified.");
 
         for (size_t i = 3; i < args.size(); i++)
         {
@@ -265,7 +271,7 @@ Examples:
             else if (arg == "-p" || arg == "--pos" || arg == "--position")
             {
                 if (i == args.size() - 1)
-                    throw std::runtime_error(arg + " needs a parameter.");
+                    throw arg_error(arg + " needs a parameter.");
                 auto pos = args[++i];
                 positionSupplied = true;
                 position = std::stoll(pos);
@@ -273,13 +279,13 @@ Examples:
             else if (arg == "-a" || arg == "--alg" || arg == "--algorithm")
             {
                 if (i == args.size() - 1)
-                    throw std::runtime_error(arg + " needs a parameter.");
+                    throw arg_error(arg + " needs a parameter.");
                 auto algo  = args[++i];
                 auto it = std::find_if(
                     crcs.begin(), crcs.end(), [&](std::shared_ptr<CRC> crc)
                     { return crc->getSpecs().name == algo; });
                 if (it == crcs.end())
-                    throw std::runtime_error("Unknown algorithm: " + algo);
+                    throw arg_error("Unknown algorithm: " + algo);
                 crc = *it;
             }
         }
@@ -349,39 +355,42 @@ int main(int argc, char **argv)
         }
     }
 
-    std::unique_ptr<Command> command;
     try
     {
-        if (args.size() < 1)
-            throw std::runtime_error("No command chosen.");
-
-        auto cmdName = args[0];
-        args.erase(args.begin());
-        cmdName.erase(0, cmdName.find_first_not_of('-'));
-
-        if (cmdName == "p" || cmdName == "patch")
-            command.reset(new PatchCommand(crcs));
-        else if (cmdName == "c" || cmdName == "calc" || cmdName == "calculate")
-            command.reset(new CalculateCommand(crcs));
-        else if (cmdName == "h" || cmdName == "help")
+        std::unique_ptr<Command> command;
+        try
         {
-            printUsage(std::cout, crcs);
-            return 0;
+            if (args.size() < 1)
+                throw arg_error("No command chosen.");
+
+            auto cmdName = args[0];
+            args.erase(args.begin());
+            cmdName.erase(0, cmdName.find_first_not_of('-'));
+
+            if (cmdName == "p" || cmdName == "patch")
+                command.reset(new PatchCommand(crcs));
+            else if (cmdName == "c" || cmdName == "calc"
+                || cmdName == "calculate")
+            {
+                command.reset(new CalculateCommand(crcs));
+            }
+            else if (cmdName == "h" || cmdName == "help")
+            {
+                printUsage(std::cout, crcs);
+                return 0;
+            }
+            else
+                throw arg_error("Unknown command: " + cmdName);
+
+            command->parse(args);
         }
-        else
-            throw std::invalid_argument("Unknown command: " + cmdName);
+        catch (arg_error &e)
+        {
+            std::cerr << e.what() << "\n";
+            printUsage(std::cerr, crcs);
+            return 1;
+        }
 
-        command->parse(args);
-    }
-    catch (std::exception &e)
-    {
-        std::cerr << e.what() << "\n";
-        printUsage(std::cerr, crcs);
-        return 1;
-    }
-
-    try
-    {
         command->run();
         return 0;
     }
