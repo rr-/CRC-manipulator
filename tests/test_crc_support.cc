@@ -20,13 +20,17 @@ void test_computing(const CRC &crc, CRC::Value checksum)
     Progress progress;
     std::string content = "123456789";
 
-    auto inFile = File::fromFileName(
-        "test-in.txt",
-        File::Mode::Write | File::Mode::Read | File::Mode::Binary);
+    {
+        auto f = File::fromFileName(
+            "test.txt", File::Mode::Write | File::Mode::Binary);
+        f->write(content.data(), content.size());
+    }
 
-    inFile->write(content.data(), content.size());
-    inFile->seek(0, File::Origin::Start);
-    REQUIRE(crc.computeChecksum(*inFile, progress) == checksum);
+    {
+        auto f = File::fromFileName(
+            "test.txt", File::Mode::Read | File::Mode::Binary);
+        REQUIRE(crc.computeChecksum(*f, progress) == checksum);
+    }
 
     std::remove("test-in.txt");
 }
