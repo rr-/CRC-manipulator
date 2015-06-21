@@ -9,6 +9,37 @@
 
 namespace
 {
+    class hex
+    {
+        public:
+            hex(CRC::Value hash, int length) : hash(hash), length(length) { }
+            friend std::ostream &operator <<(std::ostream &os, const hex &h)
+            {
+                os << std::hex
+                    << std::uppercase
+                    << std::setw(h.length)
+                    << std::setfill('0')
+                    << h.hash;
+                return os;
+            }
+        private:
+            CRC::Value hash;
+            int length;
+    };
+
+    class flag
+    {
+        public:
+            flag(bool on) : on(on) { }
+            friend std::ostream &operator <<(std::ostream &os, const flag &h)
+            {
+                os << (h.on ? "x" : "-");
+                return os;
+            }
+        private:
+            bool on;
+    };
+
     void printUsage(std::ostream &s, std::vector<std::shared_ptr<CRC>> crcs)
     {
         s << "CRC manipulator v" << CRCMANIP_VERSION << "\n";
@@ -18,41 +49,74 @@ Usage: crcmanip p[atch] INFILE OUTFILE CHECKSUM [PATCH_OPTIONS]
    or: crcmanip c[alc]  INFILE [CALC_OPTIONS]
    or: crcmanip h[elp]
 
-INFILE               path to input file
-OUTFILE              path to output file
-CHECKSUM             target checksum; must be a hexadecimal value
+Common options:
+  INFILE               path to input file
+  OUTFILE              path to output file
+  CHECKSUM             target checksum; must be a hexadecimal value
 
 PATCH_OPTIONS can be:
--a, --algorithm ALG  specifies which algorithm to use
--p, --position NUM   position where to append the patch. Unless specified,
-                     patch will be placed at the end of the input file.
-                     If position is negative, patch will be placed at the
-                     n-th byte from the end of file.
-    --insert         specifies that patch should be inserted (default)
-    --overwrite      specifies that patch should overwrite existing bytes
+  -a, --algorithm ALG  which algorithm to use
+  -i, --insert         specifies that patch should be inserted (default)
+  -o, --overwrite      specifies that patch should overwrite existing bytes
+  -p, --position NUM   position where to append the patch; unless specified,
+                       patch will be placed at the end of the input file;
+                       if position is negative, patch will be placed at the
+                       n-th byte from the end of file
 
 CALC_OPTIONS can be:
--a, --algorithm ALG  specifies which algorithm to use
+  -a, --algorithm ALG  which algorithm to use
 
-Available algorithms:
+Available ALG aglorithms:
 )";
+
+        const size_t maxChecksumSize = 8;
+        size_t maxNameSize = 0;
+        for (auto &crc : crcs)
+            if (maxNameSize < crc->getSpecs().name.size())
+                maxNameSize = crc->getSpecs().name.size();
+
+        std::ios oldState(nullptr);
+        oldState.copyfmt(std::cout);
+
+        std::cout << "  "
+            << std::setw(maxNameSize) << std::left << "Name"
+            << " | " << std::setw(8) << std::left << "polynom."
+            << "  " << std::setw(8) << std::left << "init XOR"
+            << "  " << std::setw(8) << std::left << "end XOR"
+            << "  flags"
+            << "\n";
 
         bool isDefault = true;
         for (auto &crc : crcs)
         {
+            const auto &specs = crc->getSpecs();
+            auto fill = std::string(maxChecksumSize - specs.numBytes * 2, ' ');
+            std::cout.copyfmt(oldState);
             std::cout
-                << "* "
-                << crc->getSpecs().name
-                << (isDefault ? " (default)" : "")
+                << "  "
+                << std::setw(maxNameSize) << std::left << crc->getSpecs().name
+                << " | " << fill << hex(specs.polynomial, specs.numBytes * 2)
+                << "  " << fill << hex(specs.initialXOR, specs.numBytes * 2)
+                << "  " << fill << hex(specs.finalXOR, specs.numBytes * 2)
+                << "  " << flag(isDefault)
+                << " " << flag(specs.flags & CRC::Flags::BigEndian)
+                << " " << flag(specs.flags & CRC::Flags::UseFileSize)
                 << "\n";
             isDefault = false;
         }
 
+        std::cout.copyfmt(oldState);
+
         s << R"(
+Flag legend:
+  1. Use by default when no --algorithm supplied?
+  2. Uses big endian?
+  3. Appends the file size internally?
+
 Examples:
-./crcmanip p input.txt output.txt 1234abcd
-./crcmanip patch input.txt output.txt 1234abcd -p -1
-./crcmanip calc input.txt -a CRC16IBM
+  ./crcmanip p input.txt output.txt 1234abcd
+  ./crcmanip patch input.txt output.txt 1234abcd -p -1
+  ./crcmanip calc input.txt -a CRC16IBM
 )";
     }
 
@@ -144,12 +208,7 @@ Examples:
     {
         Progress dummyProgress;
         auto checksum = crc->computeChecksum(*inputFile, dummyProgress);
-        std::cout
-            << std::hex
-            << std::setw(crc->getSpecs().numBytes * 2)
-            << std::setfill('0')
-            << checksum
-            << std::endl;
+        std::cout << hex(checksum, crc->getSpecs().numBytes * 2) << std::endl;
     }
 
     class PatchCommand : public Command
@@ -199,9 +258,9 @@ Examples:
         for (size_t i = 3; i < args.size(); i++)
         {
             auto &arg = args[i];
-            if (arg == "--insert")
+            if (arg == "-i" || arg == "--insert")
                 overwrite = false;
-            else if (arg == "--overwrite")
+            else if (arg == "-o" || arg == "--overwrite")
                 overwrite = true;
             else if (arg == "-p" || arg == "--pos" || arg == "--position")
             {
