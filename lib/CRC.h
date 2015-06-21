@@ -17,6 +17,7 @@ typedef struct
     CRCType polynomial;
     CRCType initialXOR;
     CRCType finalXOR;
+    CRCType test;
 } CRCSpecs;
 
 class CRC final

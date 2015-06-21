@@ -2,30 +2,38 @@
 #include "lib/CRCFactories.h"
 #include "test_crc_support.h"
 
+namespace
+{
+    CRCType getTestChecksum(size_t numBytes)
+    {
+        return 0xDECEA5ED & (0xFFFFFFFFUL >> (32 - (numBytes << 3)));
+    }
+}
+
 TEST_CASE("CRC computing works", "[crc]")
 {
-    SECTION("CRC32")      { test_computing(*createCRC32(),      0xcbf43926); }
-    SECTION("CRC16CCITT") { test_computing(*createCRC16CCITT(), 0x2189); }
-    SECTION("CRC16IBM")   { test_computing(*createCRC16IBM(),   0xbb3d); }
+    for (auto &crc : createAllCRC())
+        SECTION(crc->getSpecs().name)
+            test_computing(*crc, crc->getSpecs().test);
 }
 
 TEST_CASE("CRC patch appending works", "[crc]")
 {
-    SECTION("CRC32")      { test_appending(*createCRC32(),      0xdeadbeef); }
-    SECTION("CRC16CCITT") { test_appending(*createCRC16CCITT(), 0xdead); }
-    SECTION("CRC16IBM")   { test_appending(*createCRC16IBM(),   0xdead); }
+    for (auto &crc : createAllCRC())
+        SECTION(crc->getSpecs().name)
+            test_appending(*crc, getTestChecksum(crc->getSpecs().numBytes));
 }
 
 TEST_CASE("CRC patch inserting works", "[crc]")
 {
-    SECTION("CRC32")      { test_inserting(*createCRC32(),      0xdeadbeef); }
-    SECTION("CRC16CCITT") { test_inserting(*createCRC16CCITT(), 0xdead); }
-    SECTION("CRC16IBM")   { test_inserting(*createCRC16IBM(),   0xdead); }
+    for (auto &crc : createAllCRC())
+        SECTION(crc->getSpecs().name)
+            test_inserting(*crc, getTestChecksum(crc->getSpecs().numBytes));
 }
 
 TEST_CASE("CRC patch overwriting works", "[crc]")
 {
-    SECTION("CRC32")      { test_overwriting(*createCRC32(),      0xdeadbeef); }
-    SECTION("CRC16CCITT") { test_overwriting(*createCRC16CCITT(), 0xdead); }
-    SECTION("CRC16IBM")   { test_overwriting(*createCRC16IBM(),   0xdead); }
+    for (auto &crc : createAllCRC())
+        SECTION(crc->getSpecs().name)
+            test_overwriting(*crc, getTestChecksum(crc->getSpecs().numBytes));
 }

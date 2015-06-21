@@ -8,6 +8,7 @@ std::unique_ptr<CRC> createCRC32()
     specs.polynomial = 0x04C11DB7;
     specs.initialXOR = 0xFFFFFFFF;
     specs.finalXOR   = 0xFFFFFFFF;
+    specs.test       = 0xCBF43926;
     return std::unique_ptr<CRC>(new CRC(specs));
 }
 
@@ -19,6 +20,7 @@ std::unique_ptr<CRC> createCRC16CCITT()
     specs.polynomial = 0x1021;
     specs.initialXOR = 0x0000;
     specs.finalXOR   = 0x0000;
+    specs.test       = 0x2189;
     return std::unique_ptr<CRC>(new CRC(specs));
 }
 
@@ -30,6 +32,7 @@ std::unique_ptr<CRC> createCRC16IBM()
     specs.polynomial = 0x8005;
     specs.initialXOR = 0x0000;
     specs.finalXOR   = 0x0000;
+    specs.test       = 0xBB3D;
     return std::unique_ptr<CRC>(new CRC(specs));
 }
 
