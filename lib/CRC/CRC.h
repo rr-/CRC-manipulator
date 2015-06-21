@@ -1,7 +1,7 @@
 #ifndef CRC_H
 #define CRC_H
 #include <functional>
-#include "File/File.h"
+#include "File.h"
 #include "Progress.h"
 
 /**

@@ -4,7 +4,7 @@
 #include <memory>
 #include <stdexcept>
 #include "lib/CRC/CRC32.h"
-#include "lib/File/File.h"
+#include "lib/File.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 

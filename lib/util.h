@@ -1,6 +1,6 @@
 #ifndef CLI_UTIL_H
 #define CLI_UTIL_H
-#include "File/File.h"
+#include "File.h"
 
 File::OffsetType computeAutoPosition(
     File::OffsetType fileSize, size_t crcSize, bool overwrite);
