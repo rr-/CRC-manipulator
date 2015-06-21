@@ -13,6 +13,7 @@ computes to given hexadecimal hash.
 
 - Patching and calculating CRC checksums for:
   - CRC32
+  - CRC32POSIX (`cksum` from GNU coreutils)
   - CRC16CCITT
   - CRC16IBM
 - Available for GNU/Linux and Windows.
