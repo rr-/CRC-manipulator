@@ -1,3 +1,26 @@
+### 0.5
+- Added support for CRC32-POSIX! (`cksum` from GNU coreutils)
+- Fixed support for large files (+ added unit tests for file size type)
+- Fixed buffer overflow in tests
+- Fixed tests depending on each other
+- Improved CLI help:
+  - Fixed algorithm table being printed to stdout rather than stderr on errors
+  - Changed list of available algorithms to print short info about each one
+  - Changed usage to be printed only on errors related to input arguments
+  - Added blank linke between usage and error messages
+  - Reworded things a little
+- Changed strip to strip everything in build script
+- Refactoring:
+  - Replaced CRC class hierarchy with simple factories
+    - Introduced CRC::Specs that replaces getters and big CRC constructor
+  - Replaced private methods in CRC with pimpl idiom
+  - Flattened file hierarchy in lib/
+  - Fixed file names not following snake case convention
+  - Fixed test function names not following camelCase convention
+  - Moved types coupled to CRC inside CRC
+  - Changed tests to automatically test all future CRCs (by using CRC factory)
+  - Organized #includes
+
 ### 0.4
 - Restored support for CRC16CCITT and CRC16IBM in CLI
 - Restored support for calculating CRCs in CLI
