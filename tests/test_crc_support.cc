@@ -15,7 +15,7 @@ namespace
     }
 }
 
-void test_computing(const CRC &crc, CRC::Value checksum)
+void testComputing(const CRC &crc, CRC::Value checksum)
 {
     Progress progress;
     std::string content = "123456789";
@@ -35,7 +35,7 @@ void test_computing(const CRC &crc, CRC::Value checksum)
     std::remove("test-in.txt");
 }
 
-void test_appending(const CRC &crc, CRC::Value checksum)
+void testAppending(const CRC &crc, CRC::Value checksum)
 {
     Progress progress;
     auto content = getTestContent();
@@ -72,7 +72,7 @@ void test_appending(const CRC &crc, CRC::Value checksum)
     }
 }
 
-void test_inserting(const CRC &crc, CRC::Value checksum)
+void testInserting(const CRC &crc, CRC::Value checksum)
 {
     Progress progress;
     auto content = getTestContent();
@@ -113,7 +113,7 @@ void test_inserting(const CRC &crc, CRC::Value checksum)
     }
 }
 
-void test_overwriting(const CRC &crc, CRC::Value checksum)
+void testOverwriting(const CRC &crc, CRC::Value checksum)
 {
     Progress progress;
     auto content = getTestContent();
