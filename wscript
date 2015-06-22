@@ -136,7 +136,7 @@ def distbin(ctx):
     from subprocess import call, PIPE
     for p in ctx.path.ant_glob('**/*.exe'):
         if not 'test' in p.name:
-            call([getattr(os.environ, 'CROSS_COMPILE', '') + 'strip', p.abspath()], stdout=PIPE, stderr=PIPE)
+            call([getattr(os.environ, 'CROSS_COMPILE', '') + 'strip', '-s', p.abspath()], stdout=PIPE, stderr=PIPE)
             call(['upx', '-q', '--ultra-brute', p.abspath()], stdout=PIPE, stderr=PIPE)
 
     from zipfile import ZipFile, ZIP_DEFLATED
