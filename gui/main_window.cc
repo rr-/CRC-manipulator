@@ -24,9 +24,10 @@ namespace
         ui.centralWidget->setEnabled(false);
     }
 
-    void finishWork(Ui::MainWindow &ui, const std::string &message)
+    void finishWork(Ui::MainWindow &ui, const std::string &message, bool ok)
     {
-        ui.progressBar->setValue(ui.progressBar->maximum());
+        if (ok)
+            ui.progressBar->setValue(ui.progressBar->maximum());
         changeStatus(ui, message);
         ui.centralWidget->setEnabled(true);
     }
@@ -159,7 +160,7 @@ void MainWindow::on_patchPushButton_clicked()
     }
     catch (...)
     {
-        changeStatus(*ui, "Can't open input file.");
+        finishWork(*ui, "Can't open input file.", false);
         return;
     }
 
@@ -170,7 +171,7 @@ void MainWindow::on_patchPushButton_clicked()
     }
     catch (...)
     {
-        changeStatus(*ui, "Can't open output file.");
+        finishWork(*ui, "Can't open output file.", false);
         return;
     }
 
@@ -210,12 +211,12 @@ void MainWindow::progressChanged(double progress)
 
 void MainWindow::errorOccurred(const std::string &message)
 {
-    finishWork(*ui, message);
+    finishWork(*ui, message, false);
 }
 
 void MainWindow::workFinished()
 {
-    finishWork(*ui, "Done!");
+    finishWork(*ui, "Done!", true);
 }
 
 #ifdef WAF
