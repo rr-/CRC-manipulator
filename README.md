@@ -19,6 +19,16 @@ computes to given hexadecimal hash.
 - Available for GNU/Linux and Windows.
 - Minimal GUI (supports CRC32 only; for more advanced options, use CLI version).
 
+### Seeing it in action
+
+**GUI version**:
+
+![GUI version](http://i.imgur.com/A5LzhBs.png)
+
+**CLI version**:
+
+![CLI version](http://i.imgur.com/VPYLh79.png)
+
 ### Binaries for Windows
 
 To download precompiled binaries for Windows, head over to
