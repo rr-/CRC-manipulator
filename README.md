@@ -27,7 +27,7 @@ computes to given hexadecimal hash.
 
 **CLI version**:
 
-![CLI version](http://i.imgur.com/VPYLh79.png)
+![CLI version](http://i.imgur.com/a7YTbxk.png)
 
 ### Binaries for Windows
 
