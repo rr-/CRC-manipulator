@@ -1,3 +1,8 @@
+### 0.5.1
+
+- Fixed patches not being fully applied until GUI exited.
+- Fixed disabled GUI if either path couldn't be opened.
+
 ### 0.5
 - Added support for CRC32-POSIX! (`cksum` from GNU coreutils)
 - Fixed support for large files (+ added unit tests for file size type)
