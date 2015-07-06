@@ -113,10 +113,10 @@ Available ALG aglorithms:
         s.copyfmt(oldState);
 
         s << R"(
-Flag legend:
-  1. Use by default when no --algorithm supplied?
-  2. Uses big endian?
-  3. Appends the file size internally?
+  Flag legend:
+    1. Use by default when no --algorithm supplied?
+    2. Uses big endian?
+    3. Appends the file size internally?
 
 Examples:
   ./crcmanip p input.txt output.txt 1234abcd
