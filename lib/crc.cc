@@ -36,6 +36,11 @@ namespace
         }
         return result;
     }
+
+    CRC::Value getMask(size_t bits)
+    {
+        return (1ull << bits) - 1ull;
+    }
 }
 
 struct CRC::Internals
@@ -147,9 +152,8 @@ void CRC::applyPatch(
  */
 CRC::Value CRC::computeChecksum(File &input, Progress &progress) const
 {
-    CRC::Value checksum = internals->specs.initialXOR;
-    checksum = internals->computePartialChecksum(
-        input, 0, input.getSize(), checksum, progress);
+    CRC::Value checksum = internals->computePartialChecksum(
+        input, 0, input.getSize(), internals->specs.initialXOR, progress);
 
     if (internals->specs.flags & CRC::Flags::UseFileSize)
     {
@@ -160,7 +164,9 @@ CRC::Value CRC::computeChecksum(File &input, Progress &progress) const
             fileSize >>= 8;
         }
     }
-    return checksum ^ internals->specs.finalXOR;
+
+    return (checksum ^ internals->specs.finalXOR)
+        & getMask(internals->specs.numBytes << 3);
 }
 
 CRC::Internals::Internals(CRC &crc, const CRC::Specs &specs)
@@ -326,10 +332,12 @@ CRC::Value CRC::Internals::next(CRC::Value prevChecksum, uint8_t c) const
     if (specs.flags & CRC::Flags::BigEndian)
     {
         uint8_t index = (prevChecksum >> (specs.numBytes * 8 - 8)) ^ c;
-        return (prevChecksum << 8) ^ lookupTable[index];
+        return ((prevChecksum << 8) ^ lookupTable[index])
+            & getMask(specs.numBytes << 3);
     }
     uint8_t index = prevChecksum ^ c;
-    return (prevChecksum >> 8) ^ lookupTable[index];
+    return ((prevChecksum >> 8) ^ lookupTable[index])
+        & getMask(specs.numBytes << 3);
 }
 
 CRC::Value CRC::Internals::prev(CRC::Value nextChecksum, uint8_t c) const
@@ -337,10 +345,12 @@ CRC::Value CRC::Internals::prev(CRC::Value nextChecksum, uint8_t c) const
     if (specs.flags & CRC::Flags::BigEndian)
     {
         uint8_t index = nextChecksum;
-        return (c << (specs.numBytes * 8 - 8))
+        return ((c << (specs.numBytes * 8 - 8))
             ^ invLookupTable[index]
-            ^ (nextChecksum << (specs.numBytes * 8 - 8)) ^ (nextChecksum >> 8);
+            ^ (nextChecksum << (specs.numBytes * 8 - 8))
+            ^ (nextChecksum >> 8)) & getMask(specs.numBytes << 3);
     }
     uint8_t index = nextChecksum >> (specs.numBytes * 8 - 8);
-    return (nextChecksum << 8) ^ invLookupTable[index] ^ c;
+    return ((nextChecksum << 8) ^ invLookupTable[index] ^ c)
+        & getMask(specs.numBytes << 3);
 }
