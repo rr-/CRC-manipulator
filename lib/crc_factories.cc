@@ -37,6 +37,19 @@ std::unique_ptr<CRC> createCRC16CCITT()
     return std::unique_ptr<CRC>(new CRC(specs));
 }
 
+std::unique_ptr<CRC> createCRC16XMODEM()
+{
+    CRC::Specs specs = {};
+    specs.name       = "CRC16XMODEM";
+    specs.numBytes   = 2;
+    specs.polynomial = 0x1021;
+    specs.initialXOR = 0x0000;
+    specs.finalXOR   = 0x0000;
+    specs.test       = 0x31C3;
+    specs.flags      = CRC::Flags::BigEndian;
+    return std::unique_ptr<CRC>(new CRC(specs));
+}
+
 std::unique_ptr<CRC> createCRC16IBM()
 {
     CRC::Specs specs = {};
@@ -55,6 +68,7 @@ std::vector<std::shared_ptr<CRC>> createAllCRC()
     crcs.push_back(createCRC32());
     crcs.push_back(createCRC32POSIX());
     crcs.push_back(createCRC16CCITT());
+    crcs.push_back(createCRC16XMODEM());
     crcs.push_back(createCRC16IBM());
     return crcs;
 }
