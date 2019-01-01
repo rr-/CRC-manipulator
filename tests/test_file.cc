@@ -23,6 +23,5 @@ TEST_CASE("Reading and writing from files works", "[file]")
 
 TEST_CASE("Support for big file sizes works", "[file]")
 {
-    File::OffsetType test;
     REQUIRE(sizeof(File::OffsetType) > sizeof(uint32_t));
 }
