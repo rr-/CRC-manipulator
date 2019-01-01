@@ -35,5 +35,4 @@ void DropLineEdit::dropEvent(QDropEvent *event)
 
 #ifdef WAF
     #include "gui/drop_line_edit.moc"
-    #include "gui/drop_line_edit.cc.moc"
 #endif

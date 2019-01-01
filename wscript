@@ -15,7 +15,7 @@ except:
 
 
 def options(ctx):
-    ctx.load(["compiler_cxx", "qt4"])
+    ctx.load(["compiler_cxx", "qt5"])
 
     ctx.add_option(
         "-d",
@@ -82,7 +82,7 @@ def configure(ctx):
     configure_flags(ctx)
     configure_features(ctx)
     try:
-        ctx.load(["qt4"])
+        ctx.load(["qt5"])
     except:
         pass
     ctx.write_config_header("config.h")
@@ -121,7 +121,7 @@ def build(ctx):
         use=["common"],
     )
 
-    if getattr(ctx.env, "HAVE_QTCORE", False):
+    if getattr(ctx.env, "HAVE_QT5CORE", False):
         ctx.program(
             source=gui_sources,
             target="crcmanip-gui",
@@ -131,8 +131,8 @@ def build(ctx):
                 "-Wl,-subsystem,windows" if ctx.env.DEST_OS == "win32" else ""
             ],
             defines=["WAF"],
-            features=["qt4"],
-            use=["QTCORE", "QTGUI", "common"],
+            features=["qt5"],
+            use=["QT5CORE", "QT5GUI", "QT5WIDGETS", "common"],
         )
 
 

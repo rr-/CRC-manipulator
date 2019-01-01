@@ -1,12 +1,9 @@
 #include <QFileDialog>
-#include <QThread>
 #include <functional>
 #include <memory>
 #include <stdexcept>
 #include "gui/main_window.h"
-#include "lib/crc_factories.h"
-#include "lib/file.h"
-#include "ui_main_window.h" //auto generated
+#include "gui/ui_main_window.h" //auto generated
 
 namespace
 {
@@ -31,65 +28,47 @@ namespace
         changeStatus(ui, message);
         ui.centralWidget->setEnabled(true);
     }
+}
 
-    class Patcher : public QThread
+Patcher::Patcher(
+    std::unique_ptr<CRC> crc,
+    std::unique_ptr<File> inputFile,
+    std::unique_ptr<File> outputFile,
+    uint32_t checksum,
+    File::OffsetType position)
+    : crc(std::move(crc)),
+        inputFile(std::move(inputFile)),
+        outputFile(std::move(outputFile)),
+        checksum(checksum),
+        position(position)
+{
+}
+
+Patcher::~Patcher()
+{
+}
+
+void Patcher::run()
+{
+    Progress progress;
+    progress.changed = [&](double percentage)
+        { emit progressChanged(percentage); };
+
+    try
     {
-        Q_OBJECT
-
-        public:
-            explicit Patcher(
-                std::unique_ptr<CRC> crc,
-                std::unique_ptr<File> inputFile,
-                std::unique_ptr<File> outputFile,
-                uint32_t checksum,
-                File::OffsetType position)
-                : crc(std::move(crc)),
-                    inputFile(std::move(inputFile)),
-                    outputFile(std::move(outputFile)),
-                    checksum(checksum),
-                    position(position)
-            {
-            }
-
-            ~Patcher()
-            {
-            }
-
-        signals:
-            void progressChanged(double progress);
-            void errorOccurred(const std::string &message);
-
-        private:
-            void run()
-            {
-                Progress progress;
-                progress.changed = [&](double percentage)
-                    { emit progressChanged(percentage); };
-
-                try
-                {
-                    crc->applyPatch(
-                        checksum,
-                        position,
-                        *inputFile,
-                        *outputFile,
-                        false,
-                        progress,
-                        progress);
-                }
-                catch (std::exception ex)
-                {
-                    emit errorOccurred(std::string(ex.what()) + ".");
-                }
-            }
-
-            std::unique_ptr<CRC> crc;
-            std::unique_ptr<File> inputFile;
-            std::unique_ptr<File> outputFile;
-            uint32_t checksum;
-            File::OffsetType position;
-            std::function<void()> endFunction;
-    };
+        crc->applyPatch(
+            checksum,
+            position,
+            *inputFile,
+            *outputFile,
+            false,
+            progress,
+            progress);
+    }
+    catch (std::exception &ex)
+    {
+        emit errorOccurred(std::string(ex.what()) + ".");
+    }
 }
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -225,5 +204,4 @@ void MainWindow::workFinished()
 
 #ifdef WAF
     #include "gui/main_window.moc"
-    #include "gui/main_window.cc.moc"
 #endif
