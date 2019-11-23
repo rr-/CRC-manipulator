@@ -36,29 +36,46 @@ To download precompiled binaries for Windows, head over to
 
 ### Compiling
 
-1. Make sure you have `g++` and if you wish to compile GUI frontend - `qt4`.
-2. Run following:
+1. Make sure you have `g++` and `qt5` libraries installed.
 
-        ./bootstrap
-        ./waf configure
-        ./waf build
+2. Install Meson and Ninja following the instructions explained
+[here](https://mesonbuild.com/Getting-meson.html).
+
+3. Run following:
+
+        meson build --buildtype release
+        ninja -C build
 
 ### Cross compiling for Windows
 
-1. Make sure you have `mingw-w64` and if you with to compile GUI frontend -
-   `qt4` (compiled with MinGW-w64).
-   * **Arch Linux**: to get these, you can install `mingw-w64-gcc` from main
-   repositories and `mingw-w64-qt4` + dependencies from AUR.
-   * **mxe**: unfortunately, I had no luck with linking to `mxe`'s qt version.
-2. Run following:
+1. Install `mxe`
 
-        ./bootstrap
+2. Add the `mxe` path to the environment variable `PATH`
 
-        export CROSS_COMPILE=i686-w64-mingw32-
-        export CC=${CROSS_COMPILE}gcc
-        export CXX=${CROSS_COMPILE}g++
-        export AR=${CROSS_COMPILE}ar
-        export PKGCONFIG=${CROSS_COMPILE}pkg-config
+3. Install the static version of the qt5 library:
 
-        ./waf configure
-        ./waf build
+    Windows 32-bit
+
+        cd your/path/to/mxe/
+        make MXE_TARGETS=i686-w64-mingw32.static qt5
+
+    Windows 64-bit
+
+        cd your/path/to/mxe/
+        make MXE_TARGETS=x86_64-w64-mingw32.static qt5
+
+4. Build the binaries:
+
+    Windows 32-bit
+
+        meson build_windows32 --buildtype release \
+                              -Dmxe='/your/path/to/mxe/32-bit' \
+                              --cross-file cross_mingw_i686.txt
+        ninja -C build_windows32
+
+    Windows 64-bit
+
+        meson build_windows64 --buildtype release \
+                              -Dmxe='/your/path/to/mxe/64-bit' \
+                              --cross-file cross_mingw_x86_64.txt
+        ninja -C build_windows64

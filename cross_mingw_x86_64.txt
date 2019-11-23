@@ -1,0 +1,13 @@
+[binaries]
+c = 'x86_64-w64-mingw32.static-gcc'
+cpp = 'x86_64-w64-mingw32.static-g++'
+ar = 'x86_64-w64-mingw32.static-ar'
+strip = 'x86_64-w64-mingw32.static-strip'
+pkgconfig = 'x86_64-w64-mingw32.static-pkg-config'
+exe_wrapper = 'wine64' # A command used to run generated executables.
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'

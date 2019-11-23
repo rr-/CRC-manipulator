@@ -2,8 +2,9 @@
 #include <functional>
 #include <memory>
 #include <stdexcept>
+
 #include "gui/main_window.h"
-#include "gui/ui_main_window.h" //auto generated
+#include "ui_main_window.h" //auto generated
 
 namespace
 {
