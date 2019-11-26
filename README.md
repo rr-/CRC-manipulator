@@ -36,10 +36,12 @@ To download precompiled binaries for Windows, head over to
 
 ### Compiling
 
-1. Make sure you have `g++` and `qt5` libraries installed.
+1. Make sure you have `g++` `qt5` `python3-setuptools` and `python3-wheel`
+packages installed.
 
-2. Install Meson and Ninja following the instructions explained
-[here](https://mesonbuild.com/Getting-meson.html).
+2. Install Meson and Ninja
+
+        pip3 install meson ninja
 
 3. Run following:
 
