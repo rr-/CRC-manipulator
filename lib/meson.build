@@ -6,11 +6,15 @@ lib_src = files(
     'util.cc'
 )
 
-crcmanip = library('crcmanip',
-                   sources: [lib_src, config_h],
-                   install: true,
-                   include_directories: incs)
+crcmanip = library(
+    'crcmanip',
+    sources: [lib_src, config_h],
+    install: true,
+    include_directories: incs
+)
 
-crcmanip_dep = declare_dependency(link_with: crcmanip,
-                                  include_directories: incs,
-                                  sources: config_h)
+crcmanip_dep = declare_dependency(
+    link_with: crcmanip,
+    include_directories: incs,
+    sources: config_h
+)
