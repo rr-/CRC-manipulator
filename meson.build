@@ -28,16 +28,18 @@ cxxflags = [
 
 add_project_arguments(cxx.get_supported_arguments(cxxflags), language: 'cpp')
 
-# Qt5 dependency
-qt5_mod = import('qt5')
-qt5widgets = dependency('qt5', modules : 'Widgets')
+if get_option('gui')
+    # Qt5 dependency
+    qt5_mod = import('qt5')
+    qt5widgets = dependency('qt5', modules : 'Widgets')
 
-host_system = host_machine.system()
-if host_system == 'windows'
-    if get_option('mxe') == ''
-        error('You have to set an mxe path to compile the crcmanip-gui')
-    else
-        mxe_path = get_option('mxe')
+    host_system = host_machine.system()
+    if host_system == 'windows'
+         if get_option('mxe') == ''
+              error('You have to set an mxe path to compile the crcmanip-gui')
+         else
+              mxe_path = get_option('mxe')
+         endif
     endif
 endif
 
@@ -61,7 +63,10 @@ incs = include_directories('.', 'lib', 'gui')
 
 subdir('lib')
 subdir('cli')
-subdir('gui')
+
+if get_option('gui')
+   subdir('gui')
+endif
 
 if get_option('tests')
     main_url = 'https://raw.githubusercontent.com/'
