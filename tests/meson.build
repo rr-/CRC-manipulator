@@ -16,5 +16,5 @@ crcmanip_test = executable(
     sources: test_src,
     install: false,
     include_directories: incs,
-    link_with: crcmanip_lib
+    link_with: crcmanip
 )

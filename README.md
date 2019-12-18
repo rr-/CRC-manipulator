@@ -137,4 +137,4 @@ that you can find [here](https://github.com/mesonbuild/meson/tree/master/cross)
 
 ### Building tests
 
-To build tests, simply add the `-Dtests=true` option to the `meson` command
+To build tests, simply add the `-Dtests=true` option to the `meson` command.
