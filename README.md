@@ -4,10 +4,11 @@ CRC-manipulator
 A tool that lets you reverse and freely change CRC checksums through smart
 file patching.
 
-### How it works
+### Note
 
-It appends a few bytes at the end of the file so that the file checksum
-computes to given hexadecimal hash.
+This repository is no longer maintained. The focus has shifted to a [Python
+variant](https://github.com/rr-/pycrcmanip) of this tool (the performance is
+equivalent).
 
 ### Features
 
@@ -18,6 +19,11 @@ computes to given hexadecimal hash.
   - CRC16IBM
 - Available for GNU/Linux and Windows.
 - Minimal GUI (supports CRC32 only; for more advanced options, use CLI version).
+
+### How it works
+
+It appends a few bytes at the end of the file so that the file checksum
+computes to given hexadecimal hash.
 
 ### Seeing it in action
 
